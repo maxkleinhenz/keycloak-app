@@ -1,45 +1,66 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
+  <q-layout view="hHh lpR fFf">
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar class="wrap">
+        <q-toolbar-title>Keycloak Manager</q-toolbar-title>
         <q-btn
+          v-if="!isLoggedIn"
+          class="col-auto"
+          stretch
           flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
+          label="Login"
+          icon="login"
+          @click="login"
         />
-
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <template v-if="isLoggedIn">
+          <q-btn
+            flat
+            stretch
+            :label="profile?.preferred_username ?? '<empty>'"
+            @click="router.push({ name: 'profile' })"
+          />
+          <q-btn stretch flat label="Logout" icon="logout" @click="logout" />
+        </template>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item clickable v-ripple :to="{ name: 'secured' }">
-          <q-item-section avatar>
-            <q-icon name="lock" />
-          </q-item-section>
-          <q-item-section> Secured </q-item-section>
-        </q-item>
-      </q-list>
-    </q-drawer>
-
-    <q-page-container>
+    <q-page-container class="page-container q-px-xl">
       <router-view />
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { kc } from 'src/boot/keycloak';
+import { useKeyCloakStore } from 'src/stores/keycloak-store';
+import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const leftDrawerOpen = ref(false);
+const router = useRouter();
+const keycloakStore = useKeyCloakStore();
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+const isLoggedIn = computed(() => kc.authenticated ?? false);
+const profile = computed(() => keycloakStore.profile);
+
+onMounted(() => {
+  if (isLoggedIn.value) keycloakStore.loadProfile();
+});
+
+const login = async () => {
+  await keycloakStore.login();
+  await router.push({
+    name: 'profile',
+  });
+};
+
+const logout = async () => {
+  await kc.logout({ redirectUri: '/' });
+};
 </script>
+
+<style lang="scss">
+.page-container {
+  max-width: 1024px;
+  margin-inline: auto;
+}
+</style>

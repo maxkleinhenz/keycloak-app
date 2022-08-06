@@ -7,6 +7,7 @@ import {
 } from 'vue-router';
 import routes from './routes';
 import { kc } from 'boot/keycloak';
+import { useKeyCloakStore } from 'src/stores/keycloak-store';
 
 /*
  * If not building with SSR mode, you can
@@ -37,12 +38,12 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
+    const keycloakStore = useKeyCloakStore();
     if (to.meta.requiresAuth) {
       // Get the actual url of the app, it's needed for Keycloak
-      const basePath = window.location.toString();
       if (!kc.authenticated) {
         // The page is protected and the user is not authenticated. Force a login.
-        kc.login({ redirectUri: basePath.slice(0, -1) + to.path });
+        keycloakStore.login();
       } else if (kc.hasRealmRole('app-role')) {
         // The user was authenticated, and has the app role
         kc.updateToken(70)

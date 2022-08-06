@@ -6,7 +6,6 @@
       :todos="todos"
       :meta="meta"
     ></example-component>
-    <q-btn @click="loadGroups" label="Load Groups" />
   </q-page>
 </template>
 
@@ -41,10 +40,4 @@ const todos = ref<Todo[]>([
 const meta = ref<Meta>({
   totalCount: 1200,
 });
-
-const loadGroups = () => {
-  axios.get('https://keycloak.jusos.rock/app/groups').then(function (response) {
-    console.log(response);
-  });
-};
 </script>

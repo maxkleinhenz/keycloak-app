@@ -4,7 +4,6 @@ import {
   VueKeycloakInstance,
 } from '@dsb-norge/vue-keycloak-js/dist/types';
 import axios, { AxiosRequestConfig } from 'axios';
-import { type } from 'os';
 import { boot } from 'quasar/wrappers';
 
 export let kc: KeycloakInstance;
@@ -38,19 +37,14 @@ export default boot(async ({ app }) => {
       },
       config: {
         url: 'https://keycloak.jusos.rocks/',
-        realm: 'app',
+        realm: 'master',
         clientId: 'vue-app',
       },
-      onReady: (keycloak: any) => {
+      onReady: (keycloak: KeycloakInstance) => {
         registerTokenInterceptor();
         resolve();
         kc = keycloak;
       },
-      // onReady(keycloak: VueKeycloakInstance) {
-      //   registerTokenInterceptor();
-      //   resolve();
-      //   kc = keycloak;
-      // },
     });
   });
 });
