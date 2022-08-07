@@ -32,8 +32,10 @@ export default boot(async ({ app }) => {
         flow: 'standard',
         pkceMethod: 'S256',
         silentCheckSsoRedirectUri:
-          window.location.origin + '/silent-check-sso.html',
-        checkLoginIframe: false,
+          window.location.origin +
+          window.location.pathname +
+          '/silent-check-sso.html',
+        checkLoginIframe: true,
       },
       config: {
         url: 'https://keycloak.jusos.rocks/',
