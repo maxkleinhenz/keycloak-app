@@ -25,7 +25,6 @@
       <q-item-section side>
         <div class="text-grey-8 q-gutter-xs">
           <q-btn
-            class="gt-xs"
             size="12px"
             flat
             dense
@@ -34,7 +33,6 @@
             @click.prevent="openMemberDeleteConfirm(member)"
           />
           <q-btn
-            class="gt-xs"
             size="12px"
             flat
             dense

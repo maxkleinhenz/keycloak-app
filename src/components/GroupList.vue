@@ -14,7 +14,6 @@
       <q-item-section>{{ group.name }}</q-item-section>
       <q-item-section side>
         <q-btn
-          class="gt-xs"
           size="12px"
           flat
           dense

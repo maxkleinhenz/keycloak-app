@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <h1>Group</h1>
+    <PageTitle :headline="group?.name ?? ''" tagline="Group"></PageTitle>
     <div class="row">
       <div class="col-12 col-sm-6">
         <q-field borderless label="Name" stack-label>
@@ -72,6 +72,7 @@ import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GroupMemberList from 'src/components/GroupMemberList.vue';
 import GroupList from 'src/components/GroupList.vue';
+import PageTitle from 'src/components/PageTitle.vue';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
@@ -109,5 +110,3 @@ const removeUserFromGroup = async (userid: string) => {
   }
 };
 </script>
-
-<style scoped></style>

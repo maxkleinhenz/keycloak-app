@@ -1,7 +1,9 @@
 <template>
   <q-page>
-    <h1 v-if="myProfile">My Profile</h1>
-    <h1 v-if="!myProfile">Profile</h1>
+    <PageTitle
+      :headline="pageHeader"
+      :tagline="myProfile ? 'My Profile' : 'Profile'"
+    ></PageTitle>
     <div class="row q-gutter-md items-center">
       <div class="col-12 col-md-auto">
         <div class="text-center">
@@ -94,12 +96,18 @@ import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GroupList from '../components/GroupList.vue';
+import PageTitle from 'src/components/PageTitle.vue';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
 const user = ref<KeycloakUser>();
 const groups = ref<KeycloakGroup[]>();
 
+const pageHeader = computed(() => {
+  if (user.value?.firstName && user.value.lastName)
+    return `${user.value.firstName} ${user.value.lastName}`;
+  return user.value?.username ?? '-';
+});
 const myProfile = computed(
   () =>
     !route.params.username ||
@@ -131,6 +139,5 @@ const reload = async () => {
     );
   }
   groups.value = await keycloakStore.loadUserGroups(user.value?.id);
-  console.log('user', user.value);
 };
 </script>
