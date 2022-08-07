@@ -13,13 +13,29 @@
           @click="login"
         />
         <template v-if="isLoggedIn">
-          <q-btn
-            flat
-            stretch
-            :label="profile?.preferred_username ?? '<empty>'"
-            @click="router.push({ name: 'profile' })"
-          />
-          <q-btn stretch flat label="Logout" icon="logout" @click="logout" />
+          <q-btn flat stretch :label="profile?.preferred_username">
+            <q-menu>
+              <q-list style="min-width: 100px">
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="router.push({ name: 'profile' })"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="person" />
+                  </q-item-section>
+                  <q-item-section>My Profile</q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable v-close-popup @click="logout">
+                  <q-item-section avatar>
+                    <q-icon name="logout" />
+                  </q-item-section>
+                  <q-item-section>Logout</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu></q-btn
+          >
         </template>
       </q-toolbar>
     </q-header>

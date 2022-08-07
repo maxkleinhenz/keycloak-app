@@ -11,12 +11,6 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/IndexPage.vue'),
       },
       {
-        path: 'secured',
-        name: 'secured',
-        component: () => import('pages/SecuredPage.vue'),
-        meta: { requiresAuth: true },
-      },
-      {
         path: 'profile/:username?',
         name: 'profile',
         component: () => import('pages/ProfilePage.vue'),
