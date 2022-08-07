@@ -1,61 +1,63 @@
 <template>
-  <h1>Group</h1>
-  <div class="row">
-    <div class="col-12 col-sm-6">
-      <q-field borderless label="Name" stack-label>
-        <template v-slot:control>
-          <div class="text-content full-width no-outline" tabindex="0">
-            {{ group?.name ?? '-' }}
-          </div>
-        </template>
-      </q-field>
+  <q-page>
+    <h1>Group</h1>
+    <div class="row">
+      <div class="col-12 col-sm-6">
+        <q-field borderless label="Name" stack-label>
+          <template v-slot:control>
+            <div class="text-content full-width no-outline" tabindex="0">
+              {{ group?.name ?? '-' }}
+            </div>
+          </template>
+        </q-field>
+      </div>
+      <div class="col-12 col-sm-6">
+        <q-field borderless label="Path" stack-label>
+          <template v-slot:control>
+            <div class="text-content full-width no-outline" tabindex="0">
+              {{ group?.path ?? '-' }}
+            </div>
+          </template>
+        </q-field>
+      </div>
     </div>
-    <div class="col-12 col-sm-6">
-      <q-field borderless label="Path" stack-label>
-        <template v-slot:control>
-          <div class="text-content full-width no-outline" tabindex="0">
-            {{ group?.path ?? '-' }}
-          </div>
-        </template>
-      </q-field>
+    <div class="row">
+      <div class="col-12">
+        <q-field borderless label="Id" stack-label>
+          <template v-slot:control>
+            <div class="text-content full-width no-outline" tabindex="0">
+              {{ group?.id ?? '-' }}
+            </div>
+          </template>
+        </q-field>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-12">
-      <q-field borderless label="Id" stack-label>
-        <template v-slot:control>
-          <div class="text-content full-width no-outline" tabindex="0">
-            {{ group?.id ?? '-' }}
-          </div>
-        </template>
-      </q-field>
-    </div>
-  </div>
-  <div class="q-mt-xl">
-    <q-tabs
-      v-model="selectedTab"
-      dense
-      class="text-grey"
-      active-color="primary"
-      indicator-color="primary"
-      align="left"
-      inline-label
-    >
-      <q-tab name="members" icon="group" label="members" />
-      <q-tab name="subgroups" icon="account_tree" label="subgroups" />
-    </q-tabs>
+    <div class="q-mt-xl">
+      <q-tabs
+        v-model="selectedTab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="left"
+        inline-label
+      >
+        <q-tab name="members" icon="group" label="members" />
+        <q-tab name="subgroups" icon="account_tree" label="subgroups" />
+      </q-tabs>
 
-    <q-separator />
+      <q-separator />
 
-    <q-tab-panels v-model="selectedTab" animated>
-      <q-tab-panel name="members">
-        <GroupMemberList :members="members"></GroupMemberList>
-      </q-tab-panel>
-      <q-tab-panel name="subgroups">
-        <GroupList :groups="group?.subGroups"></GroupList>
-      </q-tab-panel>
-    </q-tab-panels>
-  </div>
+      <q-tab-panels v-model="selectedTab" animated>
+        <q-tab-panel name="members">
+          <GroupMemberList :members="members"></GroupMemberList>
+        </q-tab-panel>
+        <q-tab-panel name="subgroups">
+          <GroupList :groups="group?.subGroups"></GroupList>
+        </q-tab-panel>
+      </q-tab-panels>
+    </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">

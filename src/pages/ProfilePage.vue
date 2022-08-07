@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <q-page>
     <h1 v-if="myProfile">My Profile</h1>
     <h1 v-if="!myProfile">Profile</h1>
     <div class="row q-gutter-md items-center">
@@ -84,7 +84,7 @@
         </q-tab-panel>
       </q-tab-panels>
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">

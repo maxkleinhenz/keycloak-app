@@ -40,7 +40,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container class="page-container q-px-xl">
+    <q-page-container class="page-container q-px-md">
       <router-view />
     </q-page-container>
   </q-layout>
