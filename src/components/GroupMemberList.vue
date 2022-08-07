@@ -24,7 +24,15 @@
       </q-item-section>
       <q-item-section side>
         <div class="text-grey-8 q-gutter-xs">
-          <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
+          <q-btn
+            class="gt-xs"
+            size="12px"
+            flat
+            dense
+            round
+            icon="delete"
+            @click.prevent="openMemberDeleteConfirm(member)"
+          />
           <q-btn
             class="gt-xs"
             size="12px"
@@ -37,16 +45,69 @@
       </q-item-section>
     </q-item>
   </q-list>
+
+  <q-dialog v-model="showRemoveConfirm">
+    <q-card>
+      <q-card-section class="row items-center">
+        <q-avatar icon="delete" color="primary" text-color="white" />
+        <span>
+          <strong
+            v-if="memberToRemove?.firstName && memberToRemove?.lastName"
+            class="q-ml-sm"
+            >{{ memberToRemove?.firstName }} {{ memberToRemove?.lastName }}
+          </strong>
+          <strong v-else class="text-bold q-ml-sm">{{
+            memberToRemove?.username
+          }}</strong>
+          von der Gruppe <strong>{{ group?.path }}</strong> entfernen?</span
+        >
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Abbrechen" color="primary" v-close-popup />
+        <q-btn flat label="Entfernen" @click="deleteMember()" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
-import { PropType } from 'vue';
+import { KeycloakGroup } from 'src/models/KeycloakGroup';
+import { PropType, ref } from 'vue';
 const props = defineProps({
   members: {
     type: Object as PropType<KeycloakGroupMember[] | undefined>,
+    required: true,
+  },
+  group: {
+    type: Object as PropType<KeycloakGroup | undefined>,
+    required: false,
   },
 });
+
+const emit = defineEmits<{
+  (e: 'removeUserFromGroup', userId: string): void;
+}>();
+
+const showRemoveConfirm = ref(false);
+const memberToRemove = ref<KeycloakGroupMember | undefined>();
+
+const openMemberDeleteConfirm = (member: KeycloakGroupMember) => {
+  if (props.group?.id) {
+    memberToRemove.value = member;
+    showRemoveConfirm.value = true;
+  }
+};
+
+const deleteMember = async () => {
+  if (props.group?.id && memberToRemove.value?.id) {
+    emit('removeUserFromGroup', memberToRemove.value.id);
+  }
+
+  showRemoveConfirm.value = false;
+  memberToRemove.value = undefined;
+};
 </script>
 
 <style lang="scss" scoped></style>

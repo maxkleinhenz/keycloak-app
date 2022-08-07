@@ -69,6 +69,11 @@ export const useKeyCloakStore = defineStore('keycloak', {
           );
         });
     },
+    async RemoveUserFromGroup(groupId: string, userId: string) {
+      await axios.delete(
+        `https://keycloak.jusos.rocks/admin/realms/master/users/${userId}/groups/${groupId}`
+      );
+    },
   },
   getters: {
     getUserByUsername: (state) => {

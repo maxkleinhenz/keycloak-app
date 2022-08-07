@@ -50,7 +50,11 @@
 
       <q-tab-panels v-model="selectedTab" animated>
         <q-tab-panel name="members">
-          <GroupMemberList :members="members"></GroupMemberList>
+          <GroupMemberList
+            :members="members"
+            :group="group"
+            @remove-user-from-group="removeUserFromGroup"
+          ></GroupMemberList>
         </q-tab-panel>
         <q-tab-panel name="subgroups">
           <GroupList :groups="group?.subGroups"></GroupList>
@@ -95,6 +99,13 @@ const reload = async () => {
     const path = route.params.path;
     group.value = keycloakStore.getGroupByPath(path as string);
     members.value = await keycloakStore.loadGroupMember(group.value?.id ?? '');
+  }
+};
+
+const removeUserFromGroup = async (userid: string) => {
+  if (group.value) {
+    await keycloakStore.RemoveUserFromGroup(group.value.id, userid);
+    await reload();
   }
 };
 </script>
