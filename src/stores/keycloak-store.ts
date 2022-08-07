@@ -1,29 +1,36 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
-import { kc } from 'src/boot/keycloak';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { KeycloakUser } from 'src/models/KeycloakUser';
 import { KeycloakUserInfo } from 'src/models/KeycloakUserInfo';
+import { useKeycloak } from 'src/use/keyclock.config';
 
 export const useKeyCloakStore = defineStore('keycloak', {
   state: () => ({
     profile: undefined as KeycloakUserInfo | undefined,
-    groups: undefined as KeycloakGroup[] | undefined,
+    groups: undefined as Array<KeycloakGroup> | undefined,
     users: undefined as KeycloakUser[] | undefined,
   }),
   actions: {
     login() {
-      kc.login();
+      const { keycloakInstance } = useKeycloak();
+      keycloakInstance.login();
+    },
+    async logout(redirectUri = '/') {
+      const { keycloakInstance } = useKeycloak();
+      await keycloakInstance.logout({ redirectUri: redirectUri });
     },
     async loadProfile() {
-      this.profile = (await kc.loadUserInfo()) as KeycloakUserInfo;
+      const { keycloakInstance } = useKeycloak();
+      this.profile =
+        (await keycloakInstance.loadUserInfo()) as KeycloakUserInfo;
     },
     async loadAllUsers(): Promise<KeycloakUser[]> {
+      const { baseApiUrl } = useKeycloak();
+
       const users = await axios
-        .get<KeycloakUser[]>(
-          'https://keycloak.jusos.rocks/admin/realms/master/users'
-        )
+        .get<KeycloakUser[]>(`${baseApiUrl}/users`)
         .then((response) => {
           const users = response.data;
           return users.sort((a, b) =>
@@ -34,10 +41,10 @@ export const useKeyCloakStore = defineStore('keycloak', {
       return users;
     },
     async loadAllGroups(): Promise<KeycloakGroup[]> {
+      const { baseApiUrl } = useKeycloak();
+
       const groups = await axios
-        .get<KeycloakGroup[]>(
-          'https://keycloak.jusos.rocks/admin/realms/master/groups'
-        )
+        .get<KeycloakGroup[]>(`${baseApiUrl}/groups`)
         .then((response) => {
           return response.data;
         });
@@ -45,10 +52,10 @@ export const useKeyCloakStore = defineStore('keycloak', {
       return groups;
     },
     async loadUserGroups(userId: string | undefined): Promise<KeycloakGroup[]> {
+      const { baseApiUrl } = useKeycloak();
+
       return await axios
-        .get<KeycloakGroup[]>(
-          `https://keycloak.jusos.rocks/admin/realms/master/users/${userId}/groups`
-        )
+        .get<KeycloakGroup[]>(`${baseApiUrl}/users/${userId}/groups`)
         .then((response) => {
           return response.data;
         });
@@ -58,10 +65,9 @@ export const useKeyCloakStore = defineStore('keycloak', {
     ): Promise<KeycloakGroupMember[] | undefined> {
       if (!groupId) return undefined;
 
+      const { baseApiUrl } = useKeycloak();
       return await axios
-        .get<KeycloakGroupMember[]>(
-          `https://keycloak.jusos.rocks/admin/realms/master/groups/${groupId}/members`
-        )
+        .get<KeycloakGroupMember[]>(`${baseApiUrl}/groups/${groupId}/members`)
         .then((response) => {
           const members = response.data;
           return members.sort((a, b) =>
@@ -70,9 +76,8 @@ export const useKeyCloakStore = defineStore('keycloak', {
         });
     },
     async RemoveUserFromGroup(groupId: string, userId: string) {
-      await axios.delete(
-        `https://keycloak.jusos.rocks/admin/realms/master/users/${userId}/groups/${groupId}`
-      );
+      const { baseApiUrl } = useKeycloak();
+      await axios.delete(`${baseApiUrl}/users/${userId}/groups/${groupId}`);
     },
   },
   getters: {
@@ -85,9 +90,21 @@ export const useKeyCloakStore = defineStore('keycloak', {
     getGroupByPath: (state) => {
       return (path: string | undefined): KeycloakGroup | undefined => {
         if (!path) return undefined;
+        const flattenGroups: KeycloakGroup[] = [];
+        state.groups?.forEach((g) => flattGroups(flattenGroups, g));
 
-        return state.groups?.find((group) => group.path === path);
+        return flattenGroups.find((group) => {
+          return group.path === path;
+        });
       };
     },
   },
 });
+
+const flattGroups = (result: KeycloakGroup[], group: KeycloakGroup) => {
+  result.push(group);
+  group.subGroups.forEach((g) => {
+    flattGroups(result, g);
+  });
+  return result;
+};

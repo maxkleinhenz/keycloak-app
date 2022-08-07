@@ -5,8 +5,7 @@ import {
 } from '@dsb-norge/vue-keycloak-js/dist/types';
 import axios, { AxiosRequestConfig } from 'axios';
 import { boot } from 'quasar/wrappers';
-
-export let kc: KeycloakInstance;
+import { useKeycloak } from 'src/use/keyclock.config';
 
 export default boot(async ({ app }) => {
   function registerTokenInterceptor() {
@@ -22,10 +21,12 @@ export default boot(async ({ app }) => {
       (error) => {
         return Promise.reject(error);
       }
-    ); //null, { synchronous: true })
+    );
   }
 
   return new Promise((resolve) => {
+    const { baseUrl, realm, clientId, setKeycloakInstance } = useKeycloak();
+
     app.use(VueKeyCloak, {
       init: {
         onLoad: 'check-sso', // or 'login-required'
@@ -38,14 +39,14 @@ export default boot(async ({ app }) => {
         checkLoginIframe: false,
       },
       config: {
-        url: 'https://keycloak.jusos.rocks/',
-        realm: 'master',
-        clientId: 'vue-app',
+        url: baseUrl,
+        realm: realm,
+        clientId: clientId,
       },
       onReady: (keycloak: KeycloakInstance) => {
         registerTokenInterceptor();
         resolve();
-        kc = keycloak;
+        setKeycloakInstance(keycloak);
       },
     });
   });

@@ -6,8 +6,8 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
-import { kc } from 'boot/keycloak';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
+import { useKeycloak } from 'src/use/keyclock.config';
 
 /*
  * If not building with SSR mode, you can
@@ -39,25 +39,22 @@ export default route(function (/* { store, ssrContext } */) {
 
   Router.beforeEach((to, from, next) => {
     const keycloakStore = useKeyCloakStore();
+    const { keycloakInstance } = useKeycloak();
+
     if (to.meta.requiresAuth) {
       // Get the actual url of the app, it's needed for Keycloak
-      if (!kc.authenticated) {
+      if (!keycloakInstance.authenticated) {
         // The page is protected and the user is not authenticated. Force a login.
         keycloakStore.login();
-      } else if (kc.hasRealmRole('app-role')) {
-        // The user was authenticated, and has the app role
-        kc.updateToken(70)
+      } else {
+        keycloakInstance
+          .updateToken(70)
           .then(() => {
             next();
           })
           .catch((err) => {
             console.error(err);
           });
-      } else {
-        kc.userInfo;
-        // The user was authenticated, but did not have the correct role
-        // Redirect to an error page
-        next({ name: 'Unauthorized' });
       }
     } else {
       // This page did not require authentication
