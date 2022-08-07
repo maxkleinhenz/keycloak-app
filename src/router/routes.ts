@@ -17,14 +17,14 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true },
       },
       {
-        path: 'profile',
+        path: 'profile/:username?',
         name: 'profile',
         component: () => import('pages/ProfilePage.vue'),
         meta: { requiresAuth: true },
       },
       {
-        path: 'group/:path',
-        name: 'group',
+        path: 'groups/:path',
+        name: 'groups',
         component: () => import('pages/GroupPage.vue'),
         meta: { requiresAuth: true },
       },

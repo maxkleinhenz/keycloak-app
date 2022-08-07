@@ -13,7 +13,6 @@
 import { Todo, Meta } from 'components/models';
 import ExampleComponent from 'components/ExampleComponent.vue';
 import { ref } from 'vue';
-import axios from 'axios';
 
 const todos = ref<Todo[]>([
   {

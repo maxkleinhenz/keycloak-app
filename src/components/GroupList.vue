@@ -1,30 +1,40 @@
 <template>
-  <div v-if="!(profile?.groups ?? false)">no groups</div>
-  <q-list v-if="profile?.groups">
+  <div v-if="!props.groups?.length ?? 0">no groups</div>
+  <q-list v-if="props.groups">
     <q-item
-      v-for="group in profile?.groups"
-      :key="group"
+      v-for="group in groups"
+      :key="group.id"
       :to="{
-        name: 'group',
-        params: { path: group },
+        name: 'groups',
+        params: { path: group.path },
       }"
       clickable
       v-ripple
     >
-      <q-item-section>{{ group }}</q-item-section>
+      <q-item-section>{{ group.name }}</q-item-section>
       <q-item-section side>
-        <q-icon name="chevron_right" color="black" />
+        <q-btn
+          class="gt-xs"
+          size="12px"
+          flat
+          dense
+          round
+          icon="chevron_right"
+        />
       </q-item-section>
     </q-item>
   </q-list>
 </template>
 
 <script setup lang="ts">
-import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { computed } from 'vue';
+import { KeycloakGroup } from 'src/models/KeycloakGroup';
+import { PropType } from 'vue';
 
-const keycloakStore = useKeyCloakStore();
-const profile = computed(() => keycloakStore.profile);
+const props = defineProps({
+  groups: {
+    type: Object as PropType<KeycloakGroup[] | undefined>,
+  },
+});
 </script>
 
 <style scoped></style>

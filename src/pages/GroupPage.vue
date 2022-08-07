@@ -1,5 +1,36 @@
 <template>
-  <h1>{{ route.params.path }}</h1>
+  <h1>Group</h1>
+  <div class="row">
+    <div class="col-12 col-sm-6">
+      <q-field borderless label="Name" stack-label>
+        <template v-slot:control>
+          <div class="text-content full-width no-outline" tabindex="0">
+            {{ group?.name ?? '-' }}
+          </div>
+        </template>
+      </q-field>
+    </div>
+    <div class="col-12 col-sm-6">
+      <q-field borderless label="Path" stack-label>
+        <template v-slot:control>
+          <div class="text-content full-width no-outline" tabindex="0">
+            {{ group?.path ?? '-' }}
+          </div>
+        </template>
+      </q-field>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <q-field borderless label="Id" stack-label>
+        <template v-slot:control>
+          <div class="text-content full-width no-outline" tabindex="0">
+            {{ group?.id ?? '-' }}
+          </div>
+        </template>
+      </q-field>
+    </div>
+  </div>
   <div class="q-mt-xl">
     <q-tabs
       v-model="selectedTab"
@@ -11,6 +42,7 @@
       inline-label
     >
       <q-tab name="members" icon="group" label="members" />
+      <q-tab name="subgroups" icon="account_tree" label="subgroups" />
     </q-tabs>
 
     <q-separator />
@@ -19,21 +51,11 @@
       <q-tab-panel name="members">
         <GroupMemberList :members="members"></GroupMemberList>
       </q-tab-panel>
+      <q-tab-panel name="subgroups">
+        <GroupList :groups="group?.subGroups"></GroupList>
+      </q-tab-panel>
     </q-tab-panels>
   </div>
-  <!-- <div class="q-pt-lg">
-    <h2>Member</h2>
-    <q-list v-if="members">
-      <q-item v-for="member in members" :key="member.id" clickable v-ripple>
-        <q-item-section>
-          <q-item-label
-            >{{ member.firstName }} {{ member.lastName }}</q-item-label
-          >
-          <q-item-label caption lines="1">{{ member.username }}</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
-  </div> -->
 </template>
 
 <script setup lang="ts">
@@ -43,6 +65,7 @@ import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GroupMemberList from 'src/components/GroupMemberList.vue';
+import GroupList from 'src/components/GroupList.vue';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
@@ -52,20 +75,26 @@ const selectedTab = ref('members');
 
 watch(
   () => route.params.path,
-  (path) => {
-    group.value = keycloakStore.getGroupByPath(path as string);
-    keycloakStore.loadGroupMember(group.value?.id ?? '');
+  () => {
+    reload();
   }
 );
 
 onMounted(async () => {
+  reload();
+});
+
+const reload = async () => {
   if (keycloakStore.groups?.length ?? 0 === 0) {
     await keycloakStore.loadAllGroups();
   }
 
-  group.value = keycloakStore.getGroupByPath(route.params.path as string);
-  members.value = await keycloakStore.loadGroupMember(group.value?.id ?? '');
-});
+  if (route.params.path) {
+    const path = route.params.path;
+    group.value = keycloakStore.getGroupByPath(path as string);
+    members.value = await keycloakStore.loadGroupMember(group.value?.id ?? '');
+  }
+};
 </script>
 
 <style scoped></style>

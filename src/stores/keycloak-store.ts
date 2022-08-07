@@ -3,12 +3,14 @@ import { defineStore } from 'pinia';
 import { kc } from 'src/boot/keycloak';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
+import { KeycloakUser } from 'src/models/KeycloakUser';
 import { KeycloakUserInfo } from 'src/models/KeycloakUserInfo';
 
 export const useKeyCloakStore = defineStore('keycloak', {
   state: () => ({
     profile: undefined as KeycloakUserInfo | undefined,
     groups: undefined as KeycloakGroup[] | undefined,
+    users: undefined as KeycloakUser[] | undefined,
   }),
   actions: {
     login() {
@@ -17,49 +19,51 @@ export const useKeyCloakStore = defineStore('keycloak', {
     async loadProfile() {
       this.profile = (await kc.loadUserInfo()) as KeycloakUserInfo;
     },
-    async loadAllGroups() {
-      this.groups = await axios
+    async loadAllUsers(): Promise<KeycloakUser[]> {
+      const users = await axios
+        .get<KeycloakUser[]>(
+          'https://keycloak.jusos.rocks/admin/realms/master/users'
+        )
+        .then((response) => {
+          const users = response.data;
+          return users.sort((a, b) =>
+            a.firstName + a.lastName < b.firstName + b.lastName ? -1 : 1
+          );
+        });
+      this.users = users;
+      return users;
+    },
+    async loadAllGroups(): Promise<KeycloakGroup[]> {
+      const groups = await axios
         .get<KeycloakGroup[]>(
           'https://keycloak.jusos.rocks/admin/realms/master/groups'
         )
         .then((response) => {
-          const groups: Array<KeycloakGroup> = [];
-          response.data.forEach((g) => {
-            const group: KeycloakGroup = {
-              id: g.id,
-              name: g.name,
-              path: g.path,
-              subGroups: g.subGroups,
-            };
-            groups.push(group);
-          });
-          return groups;
+          return response.data;
+        });
+      this.groups = groups;
+      return groups;
+    },
+    async loadUserGroups(userId: string | undefined): Promise<KeycloakGroup[]> {
+      return await axios
+        .get<KeycloakGroup[]>(
+          `https://keycloak.jusos.rocks/admin/realms/master/users/${userId}/groups`
+        )
+        .then((response) => {
+          return response.data;
         });
     },
-    async loadGroupMember(groupId: string) {
+    async loadGroupMember(
+      groupId: string
+    ): Promise<KeycloakGroupMember[] | undefined> {
+      if (!groupId) return undefined;
+
       return await axios
         .get<KeycloakGroupMember[]>(
           `https://keycloak.jusos.rocks/admin/realms/master/groups/${groupId}/members`
         )
         .then((response) => {
-          const members: Array<KeycloakGroupMember> = [];
-          response.data.forEach((m) => {
-            const member: KeycloakGroupMember = {
-              createdTimestamp: m.createdTimestamp,
-              disableableCredentialTypes: m.disableableCredentialTypes,
-              email: m.email,
-              emailVerified: m.emailVerified,
-              enabled: m.enabled,
-              firstName: m.firstName,
-              id: m.id,
-              lastName: m.lastName,
-              notBefore: m.notBefore,
-              requiredActions: m.requiredActions,
-              totp: m.totp,
-              username: m.username,
-            };
-            members.push(member);
-          });
+          const members = response.data;
           return members.sort((a, b) =>
             a.firstName + a.lastName < b.firstName + b.lastName ? -1 : 1
           );
@@ -67,9 +71,18 @@ export const useKeyCloakStore = defineStore('keycloak', {
     },
   },
   getters: {
+    getUserByUsername: (state) => {
+      return (username: string | undefined): KeycloakUser | undefined => {
+        if (!username) return undefined;
+        return state.users?.find((user) => user.username === username);
+      };
+    },
     getGroupByPath: (state) => {
-      return (path: string) =>
-        state.groups?.find((group) => group.path === path);
+      return (path: string | undefined): KeycloakGroup | undefined => {
+        if (!path) return undefined;
+
+        return state.groups?.find((group) => group.path === path);
+      };
     },
   },
 });
