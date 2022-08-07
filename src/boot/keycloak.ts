@@ -35,7 +35,7 @@ export default boot(async ({ app }) => {
           window.location.origin +
           window.location.pathname +
           '/silent-check-sso.html',
-        checkLoginIframe: true,
+        checkLoginIframe: false,
       },
       config: {
         url: 'https://keycloak.jusos.rocks/',
