@@ -1,7 +1,7 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <q-btn
-      label="My profile"
+      label="Mein Profil"
       @click="
         router.push({
           name: 'profile',

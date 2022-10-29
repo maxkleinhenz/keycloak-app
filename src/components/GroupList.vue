@@ -6,20 +6,14 @@
       :key="group.id"
       :to="{
         name: 'groups',
-        params: { path: group.path },
+        params: { groupId: group.id },
       }"
       clickable
       v-ripple
     >
       <q-item-section>{{ group.name }}</q-item-section>
       <q-item-section side>
-        <q-btn
-          size="12px"
-          flat
-          dense
-          round
-          icon="chevron_right"
-        />
+        <q-btn size="12px" flat dense round icon="chevron_right" />
       </q-item-section>
     </q-item>
   </q-list>

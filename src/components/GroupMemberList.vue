@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!props.members?.length ?? 0">no members</div>
+  <div v-if="!props.members?.length ?? 0">Noch keine Mitglieder</div>
   <q-list v-if="props.members">
     <q-item
       v-for="member in props.members"
@@ -8,7 +8,7 @@
       v-ripple
       :to="{
         name: 'profile',
-        params: { username: member.username },
+        params: { userId: member.id },
       }"
     >
       <q-item-section>
@@ -32,13 +32,7 @@
             icon="delete"
             @click.prevent="openMemberDeleteConfirm(member)"
           />
-          <q-btn
-            size="12px"
-            flat
-            dense
-            round
-            icon="chevron_right"
-          />
+          <q-btn size="12px" flat dense round icon="chevron_right" />
         </div>
       </q-item-section>
     </q-item>

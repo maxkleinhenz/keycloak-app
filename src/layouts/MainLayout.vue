@@ -13,7 +13,7 @@
           @click="login"
         />
         <template v-if="isLoggedIn">
-          <q-btn flat stretch :label="profile?.preferred_username">
+          <q-btn flat stretch :label="profile?.username">
             <q-menu>
               <q-list style="min-width: 100px">
                 <q-item
@@ -24,7 +24,7 @@
                   <q-item-section avatar>
                     <q-icon name="person" />
                   </q-item-section>
-                  <q-item-section>My Profile</q-item-section>
+                  <q-item-section>Mein Profil</q-item-section>
                 </q-item>
                 <q-separator />
                 <q-item clickable v-close-popup @click="logout">
@@ -68,7 +68,9 @@ const login = () => {
 };
 
 const logout = async () => {
-  await keycloakStore.logout('/');
+  await keycloakStore.logout(
+    'https://keycloak.jusos.rocks/realms/master/protocol/openid-connect/logout/logout-confirm'
+  );
 };
 </script>
 

@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <PageTitle :headline="group?.name ?? ''" tagline="Group"></PageTitle>
+    <PageTitle :headline="group?.name ?? ''" tagline="Gruppe"></PageTitle>
     <div class="row">
       <div class="col-12 col-sm-6">
         <q-field borderless label="Name" stack-label>
@@ -42,8 +42,8 @@
         align="left"
         inline-label
       >
-        <q-tab name="members" icon="group" label="members" />
-        <q-tab name="subgroups" icon="account_tree" label="subgroups" />
+        <q-tab name="members" icon="group" label="Mitglieder" />
+        <q-tab name="subgroups" icon="account_tree" label="Untergruppen" />
       </q-tabs>
 
       <q-separator />
@@ -81,7 +81,7 @@ const members = ref<KeycloakGroupMember[]>();
 const selectedTab = ref('members');
 
 watch(
-  () => route.params.path,
+  () => route.params.groupId,
   () => {
     reload();
   }
@@ -92,14 +92,13 @@ onMounted(async () => {
 });
 
 const reload = async () => {
-  if (keycloakStore.groups?.length ?? 0 === 0) {
-    await keycloakStore.loadAllGroups();
-  }
+  if (route.params.groupId) {
+    const groupId = route.params.groupId as string;
+    const groupPromise = keycloakStore.loadGroup(groupId);
+    const membersPromise = keycloakStore.loadGroupMember(groupId);
 
-  if (route.params.path) {
-    const path = route.params.path;
-    group.value = keycloakStore.getGroupByPath(path as string);
-    members.value = await keycloakStore.loadGroupMember(group.value?.id ?? '');
+    group.value = await groupPromise;
+    members.value = await membersPromise;
   }
 };
 

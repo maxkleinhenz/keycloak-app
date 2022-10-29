@@ -2,7 +2,7 @@
   <q-page>
     <PageTitle
       :headline="pageHeader"
-      :tagline="myProfile ? 'My Profile' : 'Profile'"
+      :tagline="myProfile ? 'Mein Profil' : 'Profil'"
     ></PageTitle>
     <div class="row q-gutter-md items-center">
       <div class="col-12 col-md-auto">
@@ -14,17 +14,19 @@
       </div>
       <div class="col-12 col-sm">
         <div class="row items-center">
-          <q-field borderless label="Username" stack-label>
-            <template v-slot:control>
-              <div class="text-content full-width no-outline" tabindex="0">
-                {{ user?.username ?? '-' }}
-              </div>
-            </template>
-          </q-field>
+          <div class="col-12">
+            <q-field borderless label="Benutzername" stack-label>
+              <template v-slot:control>
+                <div class="text-content full-width no-outline" tabindex="0">
+                  {{ user?.username ?? '-' }}
+                </div>
+              </template>
+            </q-field>
+          </div>
         </div>
         <div class="row items-center">
           <div class="col-12 col-sm-6">
-            <q-field borderless label="First Name" stack-label>
+            <q-field borderless label="Vorname" stack-label>
               <template v-slot:control>
                 <div class="text-content full-width no-outline" tabindex="0">
                   {{ user?.firstName ?? '-' }}
@@ -33,7 +35,7 @@
             </q-field>
           </div>
           <div class="col-12 col-sm-6">
-            <q-field borderless label="Last Name" stack-label>
+            <q-field borderless label="Nachname" stack-label>
               <template v-slot:control>
                 <div class="text-content full-width no-outline" tabindex="0">
                   {{ user?.lastName ?? '-' }}
@@ -56,7 +58,7 @@
             <q-field borderless label="" stack-label>
               <template v-slot:control>
                 <q-checkbox
-                  label="E-Mail verified"
+                  label="E-Mail bestätigt"
                   :model-value="user?.emailVerified ?? false"
                 />
               </template>
@@ -75,7 +77,7 @@
         align="left"
         inline-label
       >
-        <q-tab name="groups" icon="groups" label="Groups" />
+        <q-tab name="groups" icon="groups" label="Gruppen" />
       </q-tabs>
 
       <q-separator />
@@ -110,8 +112,7 @@ const pageHeader = computed(() => {
 });
 const myProfile = computed(
   () =>
-    !route.params.username ||
-    keycloakStore.profile?.preferred_username === route.params.username
+    !route.params.userId || keycloakStore.profile?.id === route.params.userId
 );
 const selectedTab = ref('groups');
 onMounted(async () => {
@@ -119,24 +120,18 @@ onMounted(async () => {
 });
 
 watch(
-  () => route.params.username,
+  () => route.params.userId,
   () => {
     reload();
   }
 );
 
 const reload = async () => {
-  await keycloakStore.loadAllUsers();
-
-  if (route.params.username) {
-    user.value = keycloakStore.getUserByUsername(
-      route.params.username as string | undefined
-    );
+  if (route.params.userId) {
+    user.value = await keycloakStore.getUser(route.params.userId as string);
   } else {
     await keycloakStore.loadProfile();
-    user.value = keycloakStore.getUserByUsername(
-      keycloakStore.profile?.preferred_username
-    );
+    user.value = keycloakStore.profile;
   }
   groups.value = await keycloakStore.loadUserGroups(user.value?.id);
 };
