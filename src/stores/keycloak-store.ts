@@ -1,51 +1,86 @@
 import axios from 'axios';
+import Keycloak from 'keycloak-js';
 import { defineStore } from 'pinia';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { KeycloakUser } from 'src/models/KeycloakUser';
-import { useKeycloak } from 'src/use/keyclock.config';
+import { keyclockConfig } from 'src/use/keyclock.config';
+
+const createAxios = (token: string) => {
+  return axios.create({
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+let tokenInterval: NodeJS.Timeout | undefined;
+export const startTokenRefreshInterval = (
+  keycloakInstance: Keycloak | undefined
+) => {
+  clearInterval(tokenInterval);
+
+  tokenInterval = setInterval(async () => {
+    await keycloakInstance?.updateToken(70).then((refreshed) => {
+      if (!refreshed) {
+        console.log(
+          `Token not refreshed, valid for ${Math.round(
+            (keycloakInstance?.tokenParsed?.exp ?? 0) +
+              (keycloakInstance?.timeSkew ?? 0) -
+              new Date().getTime() / 1000
+          )} seconds`
+        );
+      }
+    });
+  }, 6000);
+};
 
 export const useKeyCloakStore = defineStore('keycloak', {
-  state: () => ({
-    profile: undefined as KeycloakUser | undefined,
-    groups: undefined as Array<KeycloakGroup> | undefined,
-    users: undefined as KeycloakUser[] | undefined,
-  }),
+  state: () => {
+    return {
+      keycloakInstance: undefined as undefined | Keycloak,
+      keycloakBaseApiUrl: `${keyclockConfig.url}/admin/realms/${keyclockConfig.realm}`,
+      profile: undefined as KeycloakUser | undefined,
+      groups: undefined as Array<KeycloakGroup> | undefined,
+      users: undefined as KeycloakUser[] | undefined,
+    };
+  },
   actions: {
-    login() {
-      const { keycloakInstance } = useKeycloak();
-      keycloakInstance.login();
+    async loginKeycloak() {
+      if (this.keycloakInstance) {
+        await this.keycloakInstance.login().then(() => {
+          startTokenRefreshInterval(this.keycloakInstance);
+        });
+      }
     },
     async logout(redirectUri = '/') {
-      const { keycloakInstance } = useKeycloak();
-      await keycloakInstance.logout({ redirectUri: redirectUri });
+      this.keycloakInstance?.logout({ redirectUri: redirectUri });
     },
     async loadProfile() {
-      const { keycloakInstance } = useKeycloak();
-      const profile = await keycloakInstance.loadUserProfile();
-      this.profile = await this.getUser(profile.id as string);
+      if (this.keycloakInstance) {
+        const profile = await this.keycloakInstance.loadUserProfile();
+        this.profile = await this.getUser(profile.id as string);
+      }
     },
-    getUser: async (userId: string) => {
-      const { baseApiUrl } = useKeycloak();
-      return await axios
-        .get<KeycloakUser>(`${baseApiUrl}/users/${userId}`)
+    async getUser(userId: string) {
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .get<KeycloakUser>(`${this.keycloakBaseApiUrl}/users/${userId}`)
         .then((response) => {
           return response.data;
         });
     },
     async loadUserGroups(userId: string | undefined): Promise<KeycloakGroup[]> {
-      const { baseApiUrl } = useKeycloak();
-      return await axios
-        .get<KeycloakGroup[]>(`${baseApiUrl}/users/${userId}/groups`)
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .get<KeycloakGroup[]>(
+          `${this.keycloakBaseApiUrl}/users/${userId}/groups`
+        )
         .then((response) => {
           return response.data;
         });
     },
     async loadGroup(groupId: string): Promise<KeycloakGroup> {
-      const { baseApiUrl } = useKeycloak();
-
-      return await axios
-        .get<KeycloakGroup>(`${baseApiUrl}/groups/${groupId}`)
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .get<KeycloakGroup>(`${this.keycloakBaseApiUrl}/groups/${groupId}`)
         .then((response) => {
           return response.data;
         });
@@ -55,9 +90,10 @@ export const useKeyCloakStore = defineStore('keycloak', {
     ): Promise<KeycloakGroupMember[] | undefined> {
       if (!groupId) return undefined;
 
-      const { baseApiUrl } = useKeycloak();
-      return await axios
-        .get<KeycloakGroupMember[]>(`${baseApiUrl}/groups/${groupId}/members`)
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .get<KeycloakGroupMember[]>(
+          `${this.keycloakBaseApiUrl}/groups/${groupId}/members`
+        )
         .then((response) => {
           const members = response.data;
           return members.sort((a, b) =>
@@ -66,16 +102,14 @@ export const useKeyCloakStore = defineStore('keycloak', {
         });
     },
     async RemoveUserFromGroup(groupId: string, userId: string) {
-      const { baseApiUrl } = useKeycloak();
-      await axios.delete(`${baseApiUrl}/users/${userId}/groups/${groupId}`);
+      await createAxios(this.keycloakInstance?.token ?? '').delete(
+        `${this.keycloakBaseApiUrl}/users/${userId}/groups/${groupId}`
+      );
+    },
+  },
+  getters: {
+    isAuthenticated(): boolean {
+      return this.keycloakInstance?.authenticated ?? false;
     },
   },
 });
-
-const flattGroups = (result: KeycloakGroup[], group: KeycloakGroup) => {
-  result.push(group);
-  group.subGroups.forEach((g) => {
-    flattGroups(result, g);
-  });
-  return result;
-};

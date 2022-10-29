@@ -1,4 +1,5 @@
 import { route } from 'quasar/wrappers';
+import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import {
   createMemoryHistory,
   createRouter,
@@ -6,8 +7,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
-import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { useKeycloak } from 'src/use/keyclock.config';
+// import { useKeycloak } from 'src/use/keyclock.config';
 
 /*
  * If not building with SSR mode, you can
@@ -37,24 +37,15 @@ export default route(function (/* { store, ssrContext } */) {
     ),
   });
 
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
     const keycloakStore = useKeyCloakStore();
-    const { keycloakInstance } = useKeycloak();
 
     if (to.meta.requiresAuth) {
       // Get the actual url of the app, it's needed for Keycloak
-      if (!keycloakInstance.authenticated) {
+      if (!keycloakStore.keycloakInstance?.authenticated) {
         // The page is protected and the user is not authenticated. Force a login.
-        keycloakStore.login();
-      } else {
-        keycloakInstance
-          .updateToken(70)
-          .then(() => {
-            next();
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+        await keycloakStore.loginKeycloak();
+        next();
       }
     } else {
       // This page did not require authentication

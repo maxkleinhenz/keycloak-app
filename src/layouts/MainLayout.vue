@@ -48,23 +48,24 @@
 
 <script setup lang="ts">
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { useKeycloak } from 'src/use/keyclock.config';
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const keycloakStore = useKeyCloakStore();
-const { keycloakInstance } = useKeycloak();
 
-const isLoggedIn = computed(() => keycloakInstance.authenticated ?? false);
+const isLoggedIn = computed(() => keycloakStore.isAuthenticated);
 const profile = computed(() => keycloakStore.profile);
 
 onMounted(() => {
   if (isLoggedIn.value) keycloakStore.loadProfile();
 });
 
-const login = () => {
-  keycloakStore.login();
+const login = async () => {
+  if (!isLoggedIn.value) {
+    await keycloakStore.loginKeycloak();
+  }
+  router.push({ name: 'profile' });
 };
 
 const logout = async () => {
