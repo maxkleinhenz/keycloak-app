@@ -44,7 +44,7 @@
           </q-field>
         </div>
       </div>
-      <div class="row items-center">
+      <div class="row items-center q-col-gutter-x-md">
         <div class="col-12 col-sm-6">
           <q-field v-if="!editUser" borderless label="Vorname" stack-label>
             <template v-slot:control>
@@ -76,7 +76,7 @@
           />
         </div>
       </div>
-      <div class="row items-center">
+      <div class="row items-center q-col-gutter-x-md">
         <div class="col-12 col-sm-6">
           <q-field v-if="!editUser" borderless label="E-Mail" stack-label>
             <template v-slot:control>
@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { QAvatar, QField, QCheckbox } from 'quasar';
+import { QField, QCheckbox } from 'quasar';
 import { KeycloakUser } from 'src/models/KeycloakUser';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { PropType, ref } from 'vue';
