@@ -1,11 +1,12 @@
 <template>
-  <div class="flex justify-end q-mb-md">
+  <div class="q-mb-md">
     <q-btn
       outline
       rounded
       color="grey-7"
-      label="Hinzufügen"
-      icon="o_person_add"
+      label="Mitglieder auswählen"
+      icon="o_how_to_reg"
+      @click.prevent="showAddMemberDialog = true"
     />
   </div>
   <div v-if="!props.members?.length ?? 0">Noch keine Mitglieder</div>
@@ -19,6 +20,7 @@
         name: 'profile',
         params: { userId: member.id },
       }"
+      :title="member.firstName + ' ' + member.lastName + ' anzeigen'"
     >
       <q-item-section>
         <template v-if="member.firstName || member.lastName">
@@ -39,7 +41,13 @@
             dense
             round
             icon="o_person_remove"
-            @click.prevent="memberToRemove = member"
+            @click.prevent="setMemberToRemove(member)"
+            :title="
+              member.firstName +
+              ' ' +
+              member.lastName +
+              ' aus der Gruppe entfernen'
+            "
           />
           <q-btn size="12px" flat dense round icon="chevron_right" />
         </div>
@@ -47,18 +55,32 @@
     </q-item>
   </q-list>
 
-  <GroupRemoveMember
-    :member-to-remove="memberToRemove"
-    :group="group"
-    @on-member-removed="handleOnMemberRemoved"
-  ></GroupRemoveMember>
+  <q-dialog v-model="showMemberRemoveDialog" no-backdrop-dismiss>
+    <GroupRemoveMemberCard
+      :group="group"
+      :member-to-remove="memberToRemove"
+      @remove="handleRemove"
+    ></GroupRemoveMemberCard>
+  </q-dialog>
+
+  <q-dialog v-model="showAddMemberDialog" no-backdrop-dismiss>
+    <SelectUserCard
+      title="Benutzer:innen für die Gruppe auswählen"
+      :preselected-user="members?.map((m) => m.id)"
+      @cancel="showAddMemberDialog = false"
+      @selected-users="handleSelectedUser"
+    ></SelectUserCard>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
+import { QBtn, QList, QItem, QItemSection, QItemLabel, QDialog } from 'quasar';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
+import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { PropType, ref } from 'vue';
-import GroupRemoveMember from './GroupRemoveMember.vue';
+import GroupRemoveMemberCard from './GroupRemoveMemberCard.vue';
+import SelectUserCard from './SelectUserCard.vue';
 const props = defineProps({
   members: {
     type: Object as PropType<KeycloakGroupMember[] | undefined>,
@@ -71,13 +93,47 @@ const props = defineProps({
 });
 
 const emit = defineEmits<{
-  (e: 'onMemberRemoved', member: KeycloakGroupMember): void;
+  (e: 'refresh'): void;
 }>();
 
+const store = useKeyCloakStore();
+const showMemberRemoveDialog = ref(false);
 const memberToRemove = ref<KeycloakGroupMember | undefined>();
+const setMemberToRemove = (member: KeycloakGroupMember) => {
+  showMemberRemoveDialog.value = !!member;
+  memberToRemove.value = member;
+};
+const handleRemove = async (member: KeycloakGroupMember | undefined) => {
+  if (member?.id && props.group?.id) {
+    await store.removeUserFromGroup(member.id, props.group?.id);
+  }
 
-const handleOnMemberRemoved = (member: KeycloakGroupMember) => {
-  emit('onMemberRemoved', member);
+  showMemberRemoveDialog.value = false;
+  emit('refresh');
+};
+
+const showAddMemberDialog = ref(false);
+const handleSelectedUser = async (userIds: string[]) => {
+  const currentUsers = props.members?.map((m) => m.id);
+  const newUsers = userIds.filter((u) => !currentUsers?.includes(u));
+  const usersToRemove = currentUsers?.filter((u) => !userIds.includes(u));
+
+  await Promise.all(
+    newUsers.map(async (u) => {
+      await store.addUserToGroup(u, props.group?.id);
+    })
+  );
+
+  if (usersToRemove) {
+    await Promise.all(
+      usersToRemove.map(async (u) => {
+        await store.removeUserFromGroup(u, props.group?.id);
+      })
+    );
+  }
+
+  showAddMemberDialog.value = false;
+  emit('refresh');
 };
 </script>
 

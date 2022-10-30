@@ -53,7 +53,7 @@
           <GroupMemberList
             :members="members"
             :group="group"
-            @on-member-removed="handleOnMembberRemoved"
+            @refresh="handleRefresh"
           ></GroupMemberList>
         </q-tab-panel>
         <q-tab-panel name="subgroups">
@@ -102,7 +102,7 @@ const reload = async () => {
   }
 };
 
-const handleOnMembberRemoved = async () => {
+const handleRefresh = async () => {
   await reload();
 };
 </script>

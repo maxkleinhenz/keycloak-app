@@ -10,6 +10,7 @@
       }"
       clickable
       v-ripple
+      :title="group.name + ' anzeigen'"
     >
       <q-item-section>{{ group.name }}</q-item-section>
       <q-item-section side>

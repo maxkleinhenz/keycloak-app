@@ -71,6 +71,34 @@ export const useKeyCloakStore = defineStore('keycloak', {
           return response.data;
         });
     },
+    async getUsersCount(signal: AbortSignal, search?: string | undefined) {
+      const searchParam = search ? `?search=${search}` : '';
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .get<number>(`${this.keycloakBaseApiUrl}/users/count${searchParam}`, {
+          signal: signal,
+        })
+        .then((response) => {
+          return response.data;
+        });
+    },
+    async getUsers(
+      signal: AbortSignal,
+      offset: number,
+      max: number,
+      search?: string | undefined
+    ) {
+      const searchParam = search ? `&search=${search}` : '';
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .get<KeycloakUser[]>(
+          `${this.keycloakBaseApiUrl}/users/?first=${offset}&max=${max}${searchParam}`,
+          {
+            signal: signal,
+          }
+        )
+        .then((response) => {
+          return response.data;
+        });
+    },
     async updateUser(userId: string, user: KeycloakUser) {
       return await createAxios(this.keycloakInstance?.token ?? '')
         .put(`${this.keycloakBaseApiUrl}/users/${userId}`, user)
@@ -111,7 +139,16 @@ export const useKeyCloakStore = defineStore('keycloak', {
           );
         });
     },
-    async RemoveUserFromGroup(groupId: string, userId: string) {
+    async addUserToGroup(userId: string, groupId: string | undefined) {
+      if (!groupId) return;
+
+      await createAxios(this.keycloakInstance?.token ?? '').put(
+        `${this.keycloakBaseApiUrl}/users/${userId}/groups/${groupId}`
+      );
+    },
+    async removeUserFromGroup(userId: string, groupId: string | undefined) {
+      if (!groupId) return;
+
       await createAxios(this.keycloakInstance?.token ?? '').delete(
         `${this.keycloakBaseApiUrl}/users/${userId}/groups/${groupId}`
       );
