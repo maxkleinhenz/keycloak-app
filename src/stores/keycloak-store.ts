@@ -46,11 +46,13 @@ export const useKeyCloakStore = defineStore('keycloak', {
     };
   },
   actions: {
-    async loginKeycloak() {
+    async loginKeycloak(absoluteUrl?: string) {
       if (this.keycloakInstance) {
-        await this.keycloakInstance.login().then(() => {
-          startTokenRefreshInterval(this.keycloakInstance);
-        });
+        await this.keycloakInstance
+          .login({ redirectUri: absoluteUrl })
+          .then(() => {
+            startTokenRefreshInterval(this.keycloakInstance);
+          });
       }
     },
     async logout(redirectUri = '/') {
@@ -67,6 +69,14 @@ export const useKeyCloakStore = defineStore('keycloak', {
         .get<KeycloakUser>(`${this.keycloakBaseApiUrl}/users/${userId}`)
         .then((response) => {
           return response.data;
+        });
+    },
+    async updateUser(userId: string, user: KeycloakUser) {
+      return await createAxios(this.keycloakInstance?.token ?? '')
+        .put(`${this.keycloakBaseApiUrl}/users/${userId}`, user)
+        .then((response) => {
+          const newUser = JSON.parse(response.config.data) as KeycloakUser;
+          return newUser;
         });
     },
     async loadUserGroups(userId: string | undefined): Promise<KeycloakGroup[]> {

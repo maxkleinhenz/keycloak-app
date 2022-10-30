@@ -4,69 +4,13 @@
       :headline="pageHeader"
       :tagline="myProfile ? 'Mein Profil' : 'Profil'"
     ></PageTitle>
-    <div class="row q-gutter-md items-center">
-      <div class="col-12 col-md-auto">
-        <div class="text-center">
-          <q-avatar size="150px">
-            <img src="https://cdn.quasar.dev/img/avatar.png" />
-          </q-avatar>
-        </div>
-      </div>
-      <div class="col-12 col-sm">
-        <div class="row items-center">
-          <div class="col-12">
-            <q-field borderless label="Benutzername" stack-label>
-              <template v-slot:control>
-                <div class="text-content full-width no-outline" tabindex="0">
-                  {{ user?.username ?? '-' }}
-                </div>
-              </template>
-            </q-field>
-          </div>
-        </div>
-        <div class="row items-center">
-          <div class="col-12 col-sm-6">
-            <q-field borderless label="Vorname" stack-label>
-              <template v-slot:control>
-                <div class="text-content full-width no-outline" tabindex="0">
-                  {{ user?.firstName ?? '-' }}
-                </div>
-              </template>
-            </q-field>
-          </div>
-          <div class="col-12 col-sm-6">
-            <q-field borderless label="Nachname" stack-label>
-              <template v-slot:control>
-                <div class="text-content full-width no-outline" tabindex="0">
-                  {{ user?.lastName ?? '-' }}
-                </div>
-              </template>
-            </q-field>
-          </div>
-        </div>
-        <div class="row items-center">
-          <div class="col-12 col-sm-6">
-            <q-field borderless label="E-Mail" stack-label>
-              <template v-slot:control>
-                <div class="text-content full-width no-outline" tabindex="0">
-                  {{ user?.email ?? '-' }}
-                </div>
-              </template>
-            </q-field>
-          </div>
-          <div class="col-12 col-sm-6">
-            <q-field borderless label="" stack-label>
-              <template v-slot:control>
-                <q-checkbox
-                  label="E-Mail bestätigt"
-                  :model-value="user?.emailVerified ?? false"
-                />
-              </template>
-            </q-field>
-          </div>
-        </div>
-      </div>
-    </div>
+
+    <UserProfile
+      :user="user"
+      :enable-edit="myProfile"
+      @updated-user="setUpdatedUser"
+    ></UserProfile>
+
     <div class="q-mt-xl">
       <q-tabs
         v-model="selectedTab"
@@ -77,7 +21,11 @@
         align="left"
         inline-label
       >
-        <q-tab name="groups" icon="groups" label="Gruppen" />
+        <q-tab
+          name="groups"
+          icon="groups"
+          :label="myProfile ? 'Meine Gruppen' : 'Gruppen'"
+        />
       </q-tabs>
 
       <q-separator />
@@ -99,6 +47,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GroupList from '../components/GroupList.vue';
 import PageTitle from 'src/components/PageTitle.vue';
+import UserProfile from 'src/components/UserProfile.vue';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
@@ -134,5 +83,9 @@ const reload = async () => {
     user.value = keycloakStore.profile;
   }
   groups.value = await keycloakStore.loadUserGroups(user.value?.id);
+};
+
+const setUpdatedUser = (updatedUser: KeycloakUser) => {
+  user.value = updatedUser;
 };
 </script>

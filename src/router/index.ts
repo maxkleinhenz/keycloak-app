@@ -1,5 +1,6 @@
 import { route } from 'quasar/wrappers';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
+import { useRouteUtils } from 'src/use/useRouteUtils';
 import {
   createMemoryHistory,
   createRouter,
@@ -39,14 +40,15 @@ export default route(function (/* { store, ssrContext } */) {
 
   Router.beforeEach(async (to, from, next) => {
     const keycloakStore = useKeyCloakStore();
+    const { getAbsoluteUrlFromRoute } = useRouteUtils();
 
     if (to.meta.requiresAuth) {
       // Get the actual url of the app, it's needed for Keycloak
       if (!keycloakStore.keycloakInstance?.authenticated) {
         // The page is protected and the user is not authenticated. Force a login.
-        await keycloakStore.loginKeycloak();
-        next();
+        await keycloakStore.loginKeycloak(getAbsoluteUrlFromRoute(Router, to));
       }
+      next();
     } else {
       // This page did not require authentication
       next();

@@ -48,11 +48,13 @@
 
 <script setup lang="ts">
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
+import { useRouteUtils } from 'src/use/useRouteUtils';
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const keycloakStore = useKeyCloakStore();
+const { getAbsoluteUrlFromRoute } = useRouteUtils();
 
 const isLoggedIn = computed(() => keycloakStore.isAuthenticated);
 const profile = computed(() => keycloakStore.profile);
@@ -63,7 +65,9 @@ onMounted(() => {
 
 const login = async () => {
   if (!isLoggedIn.value) {
-    await keycloakStore.loginKeycloak();
+    await keycloakStore.loginKeycloak(
+      getAbsoluteUrlFromRoute(router, { name: 'profile' })
+    );
   }
   router.push({ name: 'profile' });
 };
