@@ -53,7 +53,7 @@
           <GroupMemberList
             :members="members"
             :group="group"
-            @remove-user-from-group="removeUserFromGroup"
+            @on-member-removed="handleOnMembberRemoved"
           ></GroupMemberList>
         </q-tab-panel>
         <q-tab-panel name="subgroups">
@@ -102,10 +102,7 @@ const reload = async () => {
   }
 };
 
-const removeUserFromGroup = async (userid: string) => {
-  if (group.value) {
-    await keycloakStore.RemoveUserFromGroup(group.value.id, userid);
-    await reload();
-  }
+const handleOnMembberRemoved = async () => {
+  await reload();
 };
 </script>
