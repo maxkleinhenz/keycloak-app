@@ -81,7 +81,6 @@
 </template>
 
 <script setup lang="ts">
-import { debounce } from 'quasar';
 import { KeycloakUser } from 'src/models/KeycloakUser';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { onMounted, ref, computed, PropType } from 'vue';

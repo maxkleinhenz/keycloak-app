@@ -8,7 +8,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'home',
-        component: () => import('pages/IndexPage.vue'),
+        redirect: { name: 'profile' },
       },
       {
         path: 'profile/:userId?',

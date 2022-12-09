@@ -2,18 +2,24 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar class="wrap">
-        <q-toolbar-title>Keycloak Manager</q-toolbar-title>
+        <q-toolbar-title>Gruppenverwaltung</q-toolbar-title>
         <q-btn
           v-if="!isLoggedIn"
           class="col-auto"
           stretch
           flat
-          label="Login"
+          :label="quasar.screen.gt.xs ? 'Login' : ''"
           icon="login"
           @click="login"
         />
         <template v-if="isLoggedIn">
-          <q-btn flat stretch :label="profile?.username">
+          <q-btn
+            flat
+            stretch
+            :label="quasar.screen.gt.xs ? profile?.username : ''"
+            icon="person"
+            title="Mein Profil"
+          >
             <q-menu>
               <q-list style="min-width: 100px">
                 <q-item
@@ -51,7 +57,10 @@ import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { useRouteUtils } from 'src/use/useRouteUtils';
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { keyclockConfig } from 'src/use/keyclock.config';
+import { useQuasar } from 'quasar';
 
+const quasar = useQuasar();
 const router = useRouter();
 const keycloakStore = useKeyCloakStore();
 const { getAbsoluteUrlFromRoute } = useRouteUtils();
@@ -74,7 +83,7 @@ const login = async () => {
 
 const logout = async () => {
   await keycloakStore.logout(
-    'https://keycloak.jusos.rocks/realms/master/protocol/openid-connect/logout/logout-confirm'
+    `${keyclockConfig.url}/realms/${keyclockConfig.realm}/protocol/openid-connect/logout/logout-confirm`
   );
 };
 </script>
