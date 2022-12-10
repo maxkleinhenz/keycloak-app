@@ -1,6 +1,10 @@
 <template>
   <q-page>
-    <PageTitle :headline="group?.name ?? ''" tagline="Gruppe"></PageTitle>
+    <PageTitle
+      :headline="group?.name ?? ''"
+      tagline="Gruppe"
+      :show-edit-button="false"
+    ></PageTitle>
     <div class="row">
       <div class="col-12 col-sm-6">
         <q-field borderless label="Name" stack-label>
