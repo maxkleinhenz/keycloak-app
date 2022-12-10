@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { KeycloakUser } from 'src/models/KeycloakUser';
-import { keyclockConfig } from 'src/use/keyclock.config';
+import { keycloakConfig } from 'src/use/keycloak.config';
 
 const createAxios = (token: string) => {
   return axios.create({
@@ -39,7 +39,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
   state: () => {
     return {
       keycloakInstance: undefined as undefined | Keycloak,
-      keycloakBaseApiUrl: `${keyclockConfig.url}/admin/realms/${keyclockConfig.realm}`,
+      keycloakBaseApiUrl: `${keycloakConfig.url}/admin/realms/${keycloakConfig.realm}`,
       profile: undefined as KeycloakUser | undefined,
       groups: undefined as Array<KeycloakGroup> | undefined,
       users: undefined as KeycloakUser[] | undefined,
