@@ -17,7 +17,7 @@
             flat
             stretch
             :label="quasar.screen.gt.xs ? profile?.username : ''"
-            icon="person"
+            icon="o_account_circle"
             title="Mein Profil"
           >
             <q-menu>
@@ -28,7 +28,7 @@
                   @click="router.push({ name: 'profile' })"
                 >
                   <q-item-section avatar>
-                    <q-icon name="person" />
+                    <q-icon name="o_person" />
                   </q-item-section>
                   <q-item-section>Mein Profil</q-item-section>
                 </q-item>

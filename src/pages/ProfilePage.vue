@@ -1,15 +1,19 @@
 <template>
   <q-page>
-    <PageTitle
-      :headline="pageHeader"
-      :tagline="myProfile ? 'Mein Profil' : 'Profil'"
-    ></PageTitle>
+    <q-form @submit="onSubmit">
+      <PageTitle
+        :headline="pageHeader"
+        :tagline="myProfile ? 'Mein Profil' : 'Profil'"
+        :show-edit-button="myProfile"
+        @on-edit-click="setEditMode(true)"
+        @on-edit-cancel-click="setEditMode(false)"
+      ></PageTitle>
 
-    <UserProfile
-      :user="user"
-      :enable-edit="myProfile"
-      @updated-user="setUpdatedUser"
-    ></UserProfile>
+      <UserProfile
+        :user="editUser ?? user"
+        :edit-mode="!!editUser"
+      ></UserProfile>
+    </q-form>
 
     <div class="q-mt-xl">
       <q-tabs
@@ -53,6 +57,7 @@ const route = useRoute();
 const keycloakStore = useKeyCloakStore();
 const user = ref<KeycloakUser>();
 const groups = ref<KeycloakGroup[]>();
+const store = useKeyCloakStore();
 
 const pageHeader = computed(() => {
   if (user.value?.firstName && user.value.lastName)
@@ -64,6 +69,7 @@ const myProfile = computed(
     !route.params.userId || keycloakStore.profile?.id === route.params.userId
 );
 const selectedTab = ref('groups');
+
 onMounted(async () => {
   await reload();
 });
@@ -85,7 +91,16 @@ const reload = async () => {
   groups.value = await keycloakStore.loadUserGroups(user.value?.id);
 };
 
-const setUpdatedUser = (updatedUser: KeycloakUser) => {
-  user.value = updatedUser;
+const editUser = ref<KeycloakUser | undefined>(undefined);
+const setEditMode = (mode: boolean) => {
+  if (mode) editUser.value = { ...user.value } as KeycloakUser;
+  else editUser.value = undefined;
+};
+
+const onSubmit = async () => {
+  if (user.value?.id && editUser.value) {
+    user.value = await store.updateUser(user.value.id, editUser.value);
+  }
+  setEditMode(false);
 };
 </script>
