@@ -71,7 +71,10 @@ export const useKeyCloakStore = defineStore('keycloak', {
           return response.data;
         });
     },
-    async getUsersCount(signal: AbortSignal, search?: string | undefined) {
+    async getUsersCount(
+      signal: AbortSignal,
+      search?: string | undefined
+    ): Promise<number> {
       const searchParam = search ? `?search=${search}` : '';
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<number>(`${this.keycloakBaseApiUrl}/users/count${searchParam}`, {
@@ -86,7 +89,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
       offset: number,
       max: number,
       search?: string | undefined
-    ) {
+    ): Promise<KeycloakUser[]> {
       const searchParam = search ? `&search=${search}` : '';
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<KeycloakUser[]>(

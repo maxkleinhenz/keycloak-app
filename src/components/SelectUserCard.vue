@@ -11,7 +11,6 @@
         v-model="searchText"
         placeholder="Nach Namen oder E-Mail-Adressen suchen"
         @keydown.enter="search"
-        ref="searchInputRef"
       >
         <template v-slot:append>
           <q-btn
@@ -34,39 +33,35 @@
         </template>
       </q-input>
     </q-card-section>
-    <q-card-section class="overflow-auto">
-      <!-- <q-scroll-area class="full-height"> -->
-      <q-list class="full-width">
-        <q-item v-for="user in users" :key="user.id" dense v-ripple tag="label">
-          <q-item-section side top>
-            <q-checkbox
-              v-model="selectedUsers"
-              :val="user.id"
-              :toggle-indeterminate="false"
-            />
-          </q-item-section>
-
-          <q-item-section>
-            <q-item-label
-              >{{ user.firstName }} {{ user.lastName }}</q-item-label
-            >
-            <q-item-label caption>{{ user.username }} </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-      <!-- </q-scroll-area> -->
-    </q-card-section>
     <q-card-section>
-      <div class="flex flex-center">
-        <q-pagination
-          v-model="currentPage"
-          :max="maxPage"
-          direction-links
-          outline
-          rounded
-          flat
-        />
-      </div>
+      <InfiniteVirtualList
+        :virtual-options="{ itemHeight: 44 }"
+        :load-more="(skip) => loadMore(skip)"
+        :max-count="maxCount"
+        v-slot="slotProps"
+      >
+        <div v-for="{ index, data } in slotProps.list" :key="index">
+          <q-item :key="(data as KeycloakUser).id" dense v-ripple tag="label">
+            <q-item-section side top>
+              <q-checkbox
+                v-model="selectedUsers"
+                :val="(data as KeycloakUser).id"
+                :toggle-indeterminate="false"
+              />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label
+                >{{ (data as KeycloakUser).firstName }}
+                {{ (data as KeycloakUser).lastName }}</q-item-label
+              >
+              <q-item-label caption
+                >{{ (data as KeycloakUser).username }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </div>
+      </InfiniteVirtualList>
     </q-card-section>
     <q-card-actions align="right">
       <q-btn flat label="Abbrechen" @click="onCancel" />
@@ -83,7 +78,8 @@
 <script setup lang="ts">
 import { KeycloakUser } from 'src/models/KeycloakUser';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { onMounted, ref, computed, PropType } from 'vue';
+import { onMounted, ref, PropType } from 'vue';
+import InfiniteVirtualList from './InfiniteVirtualList.vue';
 
 const props = defineProps({
   title: {
@@ -96,7 +92,7 @@ const props = defineProps({
   },
   okButtonLabel: {
     type: String,
-    default: 'Auswählen',
+    default: 'Übernehmen',
     required: false,
   },
 });
@@ -104,17 +100,12 @@ const props = defineProps({
 onMounted(async () => {
   await initUserList();
   selectedUsers.value = props.preselectedUser ?? [];
-  currentPage.value = 1;
-
-  searchInputRef.value?.focus();
 });
 
 const emit = defineEmits<{
   (e: 'cancel'): void;
   (e: 'selectedUsers', member: string[]): void;
 }>();
-
-const searchInputRef = ref<HTMLElement | undefined>(undefined);
 
 let abortController = new AbortController();
 const resetAbortController = () => {
@@ -123,55 +114,37 @@ const resetAbortController = () => {
 };
 
 const store = useKeyCloakStore();
-const users = ref<KeycloakUser[]>([]);
 const selectedUsers = ref<string[]>([]);
 
 const searchText = ref<string | undefined>(undefined);
 const search = async () => {
   resetAbortController();
 
-  await initUserList();
-  await loadPage(currentPage.value, searchText.value);
+  await initUserList(searchText.value);
 };
 const resetSearch = async () => {
   searchText.value = undefined;
   await search();
 };
 
-const minPage = 1;
 const maxPage = ref(0);
-const resultSize = ref(10);
+const resultSize = 10;
 const maxCount = ref(0);
 
-const currentPageValue = ref(0);
-const currentPage = computed({
-  get() {
-    return currentPageValue.value;
-  },
-  async set(value: number) {
-    resetAbortController();
-
-    // clamp
-    currentPageValue.value = Math.min(Math.max(value, minPage), maxPage.value);
-    await loadPage(currentPageValue.value, searchText.value);
-  },
-});
-
-const initUserList = async () => {
+const initUserList = async (search?: string | undefined) => {
   maxCount.value = await store.getUsersCount(
     abortController.signal,
     searchText.value
   );
-  maxPage.value = Math.ceil(maxCount.value / resultSize.value);
+  maxPage.value = Math.ceil(maxCount.value / resultSize);
 };
 
-const loadPage = async (page: number, search?: string | undefined) => {
-  const offset = Math.min((page - 1) * resultSize.value);
-  users.value = await store.getUsers(
+const loadMore = (skip: number) => {
+  return store.getUsers(
     abortController.signal,
-    offset,
-    resultSize.value,
-    search
+    skip,
+    resultSize,
+    searchText.value
   );
 };
 
