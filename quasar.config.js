@@ -56,7 +56,7 @@ module.exports = configure(function (ctx) {
       devtool: 'source-map',
 
       // transpile: false,
-      publicPath: 'keycloak-app',
+      //publicPath: '',
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
