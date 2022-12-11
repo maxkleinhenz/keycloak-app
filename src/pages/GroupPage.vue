@@ -6,26 +6,6 @@
       :show-edit-button="false"
     ></PageTitle>
     <div class="row">
-      <div class="col-12 col-sm-6">
-        <q-field borderless label="Name" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ group?.name ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-field borderless label="Path" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ group?.path ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-    </div>
-    <div class="row">
       <div class="col-12">
         <q-field borderless label="Id" stack-label>
           <template v-slot:control>
@@ -36,6 +16,27 @@
         </q-field>
       </div>
     </div>
+    <div class="row">
+      <div class="col-12 col-sm-6">
+        <q-field borderless label="Name" stack-label>
+          <template v-slot:control>
+            <div class="text-content full-width no-outline" tabindex="0">
+              {{ group?.name ?? '-' }}
+            </div>
+          </template>
+        </q-field>
+      </div>
+      <div class="col-12 col-sm-6">
+        <q-field borderless label="Pfad" stack-label>
+          <template v-slot:control>
+            <div class="text-content full-width no-outline" tabindex="0">
+              {{ group?.path ?? '-' }}
+            </div>
+          </template>
+        </q-field>
+      </div>
+    </div>
+
     <div class="q-mt-xl">
       <q-tabs
         v-model="selectedTab"
