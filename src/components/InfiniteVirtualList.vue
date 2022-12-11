@@ -1,5 +1,5 @@
 <template>
-  <div v-bind="containerProps" style="height: 300px">
+  <div v-bind="containerProps">
     <div v-bind="wrapperProps">
       <slot :list="list"></slot>
     </div>

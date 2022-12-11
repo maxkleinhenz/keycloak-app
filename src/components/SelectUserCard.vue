@@ -1,9 +1,10 @@
 <template>
-  <q-card class="flex column no-wrap no-scroll">
+  <q-card class="container flex column no-wrap no-scroll">
     <q-card-section>
-      <div class="text-h6">{{ props.title }}</div>
-    </q-card-section>
-    <q-card-section>
+      <h2 class="text-h6 q-mb-none">{{ props.title }}</h2>
+      <p class="text-body2">
+        Es können neue Mitglieder hinzugefügt, oder vorhandene entfernt werden.
+      </p>
       <q-input
         rounded
         outlined
@@ -33,7 +34,7 @@
         </template>
       </q-input>
     </q-card-section>
-    <q-card-section>
+    <q-card-section class="scroll">
       <InfiniteVirtualList
         :virtual-options="{ itemHeight: 44 }"
         :load-more="(skip) => loadMore(skip)"
@@ -127,8 +128,7 @@ const resetSearch = async () => {
   await search();
 };
 
-const maxPage = ref(0);
-const resultSize = 10;
+const resultSize = 20;
 const maxCount = ref(0);
 
 const initUserList = async (search?: string | undefined) => {
@@ -136,7 +136,6 @@ const initUserList = async (search?: string | undefined) => {
     abortController.signal,
     searchText.value
   );
-  maxPage.value = Math.ceil(maxCount.value / resultSize);
 };
 
 const loadMore = (skip: number) => {
@@ -157,4 +156,10 @@ const onCancel = () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.container {
+  width: 80vw;
+  max-width: 500px;
+  max-height: 600px;
+}
+</style>
