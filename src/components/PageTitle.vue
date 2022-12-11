@@ -1,5 +1,5 @@
 <template>
-  <div class="column q-my-xl">
+  <div class="column q-mt-xl q-mb-lg">
     <p v-if="props.tagline" class="col text-uppercase text-grey-8 q-mb-xs">
       {{ props.tagline }}
     </p>

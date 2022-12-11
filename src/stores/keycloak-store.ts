@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { KeycloakUser } from 'src/models/KeycloakUser';
-import { keyclockConfig } from 'src/use/keyclock.config';
+import { keycloakConfig } from 'src/use/keycloak.config';
 
 const createAxios = (token: string) => {
   return axios.create({
@@ -39,7 +39,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
   state: () => {
     return {
       keycloakInstance: undefined as undefined | Keycloak,
-      keycloakBaseApiUrl: `${keyclockConfig.url}/admin/realms/${keyclockConfig.realm}`,
+      keycloakBaseApiUrl: `${keycloakConfig.url}/admin/realms/${keycloakConfig.realm}`,
       profile: undefined as KeycloakUser | undefined,
       groups: undefined as Array<KeycloakGroup> | undefined,
       users: undefined as KeycloakUser[] | undefined,
@@ -71,7 +71,10 @@ export const useKeyCloakStore = defineStore('keycloak', {
           return response.data;
         });
     },
-    async getUsersCount(signal: AbortSignal, search?: string | undefined) {
+    async getUsersCount(
+      signal: AbortSignal,
+      search?: string | undefined
+    ): Promise<number> {
       const searchParam = search ? `?search=${search}` : '';
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<number>(`${this.keycloakBaseApiUrl}/users/count${searchParam}`, {
@@ -86,7 +89,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
       offset: number,
       max: number,
       search?: string | undefined
-    ) {
+    ): Promise<KeycloakUser[]> {
       const searchParam = search ? `&search=${search}` : '';
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<KeycloakUser[]>(

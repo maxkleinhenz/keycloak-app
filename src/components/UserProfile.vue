@@ -45,7 +45,7 @@
     </div>
     <div class="row items-center q-col-gutter-x-md">
       <div class="col-12 col-sm-6">
-        <q-field v-if="!editMode" borderless label="E-Mail" stack-label>
+        <q-field v-if="!editMode" borderless label="E-Mail-Adresse" stack-label>
           <template v-slot:control>
             <div class="text-content full-width no-outline" tabindex="0">
               {{ props.user?.email ?? '-' }}
@@ -56,14 +56,14 @@
           v-if="editMode"
           v-model="props.user!.email"
           class="full-width"
-          label="E-Mail"
+          label="E-Mail-Adresse"
         />
       </div>
       <div class="col-12 col-sm-6">
-        <q-field borderless label="" stack-label>
+        <q-field borderless label="E-Mail-Adresse bestätigt" stack-label>
           <template v-slot:control>
             <q-checkbox
-              label="E-Mail bestätigt"
+              label="Bestätigt"
               :model-value="props.user?.emailVerified ?? false"
             />
           </template>

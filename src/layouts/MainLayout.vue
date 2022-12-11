@@ -57,7 +57,7 @@ import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { useRouteUtils } from 'src/use/useRouteUtils';
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { keyclockConfig } from 'src/use/keyclock.config';
+import { keycloakConfig } from 'src/use/keycloak.config';
 import { useQuasar } from 'quasar';
 
 const quasar = useQuasar();
@@ -83,7 +83,7 @@ const login = async () => {
 
 const logout = async () => {
   await keycloakStore.logout(
-    `${keyclockConfig.url}/realms/${keyclockConfig.realm}/protocol/openid-connect/logout/logout-confirm`
+    `${keycloakConfig.url}/realms/${keycloakConfig.realm}/protocol/openid-connect/logout/logout-confirm`
   );
 };
 </script>

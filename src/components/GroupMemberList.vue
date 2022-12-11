@@ -65,7 +65,7 @@
 
   <q-dialog v-model="showAddMemberDialog" no-backdrop-dismiss>
     <SelectUserCard
-      title="Benutzer:innen für die Gruppe auswählen"
+      title="Mitglieder auswählen"
       :preselected-user="members?.map((m) => m.id)"
       @cancel="showAddMemberDialog = false"
       @selected-users="handleSelectedUser"

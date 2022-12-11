@@ -1,6 +1,6 @@
 import { KeycloakConfig } from 'keycloak-js';
 
-export const keyclockConfig: KeycloakConfig = {
+export const keycloakConfig: KeycloakConfig = {
   url: 'https://login.rote.tools',
   realm: 'user',
   clientId: 'group-manager',

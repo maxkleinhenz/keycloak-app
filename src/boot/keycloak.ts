@@ -1,6 +1,6 @@
 import { boot } from 'quasar/wrappers';
 import Keycloak from 'keycloak-js';
-import { keyclockConfig } from 'src/use/keyclock.config';
+import { keycloakConfig } from 'src/use/keycloak.config';
 import {
   startTokenRefreshInterval,
   useKeyCloakStore,
@@ -9,7 +9,7 @@ import {
 export default boot(async () => {
   const keycloakStore = useKeyCloakStore();
 
-  const keycloak = new Keycloak(keyclockConfig);
+  const keycloak = new Keycloak(keycloakConfig);
   keycloakStore.keycloakInstance = keycloak;
 
   await keycloak
