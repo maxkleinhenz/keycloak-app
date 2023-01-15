@@ -39,8 +39,8 @@ export interface Props {
 const props = defineProps<Props>()
 
 const keycloakStore = useKeyCloakStore();
-const groups = ref<KeycloakGroup[] | undefined>([]);
-const loading = ref(false);
+const groups = ref<KeycloakGroup[] | undefined>(undefined);
+const loading = ref(true);
 
 const { userId, clickable } = toRefs(props);
 watch([userId, clickable], async ([userId, clickable]) => {

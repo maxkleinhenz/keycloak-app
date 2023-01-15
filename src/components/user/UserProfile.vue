@@ -44,7 +44,7 @@
 import { KeycloakProfile } from 'keycloak-js';
 import { QField, QCheckbox } from 'quasar';
 import { computed, PropType } from 'vue';
-import InlineEditableField from './common/InlineEditableField.vue';
+import InlineEditableField from '../common/InlineEditableField.vue';
 
 const props = defineProps({
   modelValue: {

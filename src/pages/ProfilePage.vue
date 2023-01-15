@@ -29,9 +29,9 @@
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import GroupList from '../components/GroupList.vue';
+import GroupList from '../components/group/GroupList.vue';
 import PageTitle from 'src/components/common/PageTitle.vue';
-import UserProfile from 'src/components/UserProfile.vue';
+import UserProfile from 'src/components/user/UserProfile.vue';
 import { KeycloakProfile } from 'keycloak-js';
 import { QForm } from 'quasar';
 

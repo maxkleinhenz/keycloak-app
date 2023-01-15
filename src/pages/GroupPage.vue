@@ -60,8 +60,8 @@ import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import GroupMemberList from 'src/components/GroupMemberList.vue';
-import GroupList from 'src/components/GroupList.vue';
+import GroupMemberList from 'src/components/group/GroupMemberList.vue';
+import GroupList from 'src/components/group/GroupList.vue';
 import PageTitle from 'src/components/common/PageTitle.vue';
 
 const route = useRoute();
