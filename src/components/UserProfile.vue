@@ -5,7 +5,7 @@
         <q-field borderless label="Benutzername" stack-label>
           <template v-slot:control>
             <div class="text-content full-width no-outline" tabindex="0">
-              {{ props.user?.username ?? '-' }}
+              {{ value.username ?? '-' }}
             </div>
           </template>
         </q-field>
@@ -13,59 +13,26 @@
     </div>
     <div class="row items-center q-col-gutter-x-md">
       <div class="col-12 col-sm-6">
-        <q-field v-if="!editMode" borderless label="Vorname" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ props.user?.firstName ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-        <q-input
-          v-if="editMode"
-          v-model="props.user!.firstName"
-          class="full-width"
-          label="Vorname"
-        />
+        <InlineEditableField label="Vorname" v-model="value.firstName" :edit-mode="editMode" />
       </div>
       <div class="col-12 col-sm-6">
-        <q-field v-if="!editMode" borderless label="Nachname" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ props.user?.lastName ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-        <q-input
-          v-if="editMode"
-          v-model="props.user!.lastName"
-          class="full-width"
-          label="Nachname"
-        />
+        <InlineEditableField label="Nachname" v-model="value.lastName" :edit-mode="editMode" />
       </div>
     </div>
     <div class="row items-center q-col-gutter-x-md">
       <div class="col-12 col-sm-6">
-        <q-field v-if="!editMode" borderless label="E-Mail-Adresse" stack-label>
+        <q-field borderless label="E-Mail-Adresse" stack-label>
           <template v-slot:control>
             <div class="text-content full-width no-outline" tabindex="0">
-              {{ props.user?.email ?? '-' }}
+              {{ value.email ?? '-' }}
             </div>
           </template>
         </q-field>
-        <q-input
-          v-if="editMode"
-          v-model="props.user!.email"
-          class="full-width"
-          label="E-Mail-Adresse"
-        />
       </div>
       <div class="col-12 col-sm-6">
         <q-field borderless label="E-Mail-Adresse bestätigt" stack-label>
           <template v-slot:control>
-            <q-checkbox
-              label="Bestätigt"
-              :model-value="props.user?.emailVerified ?? false"
-            />
+            <q-checkbox label="Bestätigt" :model-value="value.emailVerified ?? false" />
           </template>
         </q-field>
       </div>
@@ -74,13 +41,14 @@
 </template>
 
 <script setup lang="ts">
+import { KeycloakProfile } from 'keycloak-js';
 import { QField, QCheckbox } from 'quasar';
-import { KeycloakUser } from 'src/models/KeycloakUser';
-import { PropType } from 'vue';
+import { computed, PropType } from 'vue';
+import InlineEditableField from './common/InlineEditableField.vue';
 
 const props = defineProps({
-  user: {
-    type: Object as PropType<KeycloakUser | undefined>,
+  modelValue: {
+    type: Object as PropType<KeycloakProfile>,
     required: true,
   },
   editMode: {
@@ -88,6 +56,18 @@ const props = defineProps({
     required: true,
   },
 });
-</script>
 
-<style scoped></style>
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: KeycloakProfile): void;
+}>();
+
+const value = computed({
+  get() {
+    return props.modelValue
+  },
+  set(value) {
+    emit('update:modelValue', value)
+  }
+})
+
+</script>

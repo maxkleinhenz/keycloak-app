@@ -1,17 +1,11 @@
-export interface KeycloakUser {
-  access: KeycloackUserAccess;
-  createdTimestamp: number;
-  disableableCredentialTypes: [];
-  email: string;
-  emailVerified: boolean;
-  enabled: boolean;
-  firstName: string;
-  id: string;
-  lastName: string;
-  notBefore: number;
-  requiredActions: [];
-  totp: boolean;
-  username: string;
+import { KeycloakProfile } from 'keycloak-js';
+
+export interface KeycloakUser extends KeycloakProfile {
+  // access: KeycloackUserAccess;
+  // disableableCredentialTypes: [];
+  // notBefore: number;
+  // requiredActions: [];
+  // username: string;
 }
 
 export interface KeycloackUserAccess {
