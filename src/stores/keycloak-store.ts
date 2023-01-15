@@ -175,5 +175,13 @@ export const useKeyCloakStore = defineStore('keycloak', {
     isAuthenticated(): boolean {
       return this.keycloakInstance?.authenticated ?? false;
     },
+    canQueryGroups(): boolean {
+      return (
+        this.keycloakInstance?.hasResourceRole(
+          'query-groups',
+          'realm-management'
+        ) ?? false
+      );
+    },
   },
 });

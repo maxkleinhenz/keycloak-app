@@ -18,7 +18,7 @@
 
       <q-tab-panels v-model="selectedTab" animated>
         <q-tab-panel name="groups">
-          <GroupList :groups="groups"></GroupList>
+          <GroupList :userId="user.id" :clickable="keycloakStore.canQueryGroups"></GroupList>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -26,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -39,7 +38,6 @@ import { QForm } from 'quasar';
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
 const user = ref<KeycloakProfile>({} as KeycloakProfile);
-const groups = ref<KeycloakGroup[]>();
 const store = useKeyCloakStore();
 
 const userformRef = ref<null | QForm>(null);
@@ -63,13 +61,10 @@ const reload = async () => {
   if (myProfile.value) {
     await keycloakStore.loadProfile();
     user.value = keycloakStore.profile ?? {};
-    groups.value = store.userInfo?.group_membership.map((g) => <KeycloakGroup>{ id: g, name: g, path: g, subGroups: [] })
   } else {
     user.value = await keycloakStore.getUser(route.params.userId as string);
-    groups.value = await keycloakStore.loadUserGroups(user.value?.id);
   }
   editUser.value = { ...user.value } as KeycloakProfile;
-
 };
 
 watch(
