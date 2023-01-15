@@ -10,38 +10,14 @@
         </h1>
       </div>
 
-      <div v-if="showEditButton" class="col-auto">
+      <div v-if="props.enableEdit" class="col-auto">
         <div class="q-gutter-md">
-          <q-btn
-            v-if="!isEditMode"
-            class="col-auto"
-            outline
-            rounded
-            color="primary"
-            :label="props.editButtonLabel"
-            :icon="props.editButtonIcon"
-            @click="setEditMode"
-          />
-          <q-btn
-            v-if="isEditMode"
-            class="col-auto"
-            outline
-            rounded
-            color="grey-7"
-            :label="props.cancelButtonLabel"
-            :icon="props.cancelButtonIcon"
-            @click="cancelEdit"
-          />
-          <q-btn
-            v-if="isEditMode"
-            class="col-auto"
-            type="submit"
-            outline
-            rounded
-            color="primary"
-            :label="props.saveButtonLabel"
-            :icon="props.saveButtonIcon"
-          />
+          <q-btn v-if="!props.editMode" class="col-auto" outline rounded color="primary" :label="props.editButtonLabel"
+            :icon="props.editButtonIcon" @click="setEditMode" />
+          <q-btn v-if="editMode" class="col-auto" outline rounded color="grey-7" :label="props.cancelButtonLabel"
+            :icon="props.cancelButtonIcon" @click="cancelEdit" />
+          <q-btn v-if="editMode" class="col-auto" outline rounded color="primary" :label="props.saveButtonLabel"
+            :icon="props.saveButtonIcon" @click="submit" />
         </div>
       </div>
     </div>
@@ -49,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 const props = defineProps({
   headline: {
     type: String,
@@ -60,9 +34,13 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  showEditButton: {
+  enableEdit: {
     type: Boolean,
     required: true,
+  },
+  editMode: {
+    type: Boolean,
+    required: false,
   },
   editButtonLabel: {
     type: String,
@@ -91,20 +69,20 @@ const props = defineProps({
 });
 
 const emit = defineEmits<{
-  (e: 'onEditClick'): void;
-  (e: 'onEditCancelClick'): void;
-  (e: 'onEditSaveClick'): void;
+  (e: 'edit'): void;
+  (e: 'cancel'): void;
+  (e: 'save'): void;
 }>();
 
-const isEditMode = ref(false);
-
 const setEditMode = () => {
-  isEditMode.value = true;
-  emit('onEditClick');
+  emit('edit');
 };
 
 const cancelEdit = () => {
-  isEditMode.value = false;
-  emit('onEditCancelClick');
+  emit('cancel');
 };
+
+const submit = () => {
+  emit('save');
+}
 </script>

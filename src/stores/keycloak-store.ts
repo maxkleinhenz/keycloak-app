@@ -1,9 +1,10 @@
 import axios from 'axios';
-import Keycloak from 'keycloak-js';
+import Keycloak, { KeycloakProfile } from 'keycloak-js';
 import { defineStore } from 'pinia';
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { KeycloakUser } from 'src/models/KeycloakUser';
+import { KeycloakUserInfo } from 'src/models/KeycloakUserInfo';
 import { keycloakConfig } from 'src/use/keycloak.config';
 
 const createAxios = (token: string) => {
@@ -39,8 +40,10 @@ export const useKeyCloakStore = defineStore('keycloak', {
   state: () => {
     return {
       keycloakInstance: undefined as undefined | Keycloak,
-      keycloakBaseApiUrl: `${keycloakConfig.url}/admin/realms/${keycloakConfig.realm}`,
-      profile: undefined as KeycloakUser | undefined,
+      keycloakBaseAdminApiUrl: `${keycloakConfig.url}/admin/realms/${keycloakConfig.realm}`,
+      keycloakBaseAccountApiUrl: `${keycloakConfig.url}/realms/${keycloakConfig.realm}/account`,
+      profile: undefined as KeycloakProfile | undefined,
+      userInfo: undefined as KeycloakUserInfo | undefined,
       groups: undefined as Array<KeycloakGroup> | undefined,
       users: undefined as KeycloakUser[] | undefined,
     };
@@ -60,13 +63,21 @@ export const useKeyCloakStore = defineStore('keycloak', {
     },
     async loadProfile() {
       if (this.keycloakInstance) {
-        const profile = await this.keycloakInstance.loadUserProfile();
-        this.profile = await this.getUser(profile.id as string);
+        this.profile = await this.keycloakInstance.loadUserProfile();
+        this.userInfo =
+          (await this.keycloakInstance.loadUserInfo()) as KeycloakUserInfo;
       }
+    },
+    async updateProfile(signal: AbortSignal, profile: KeycloakProfile) {
+      return await createAxios(this.keycloakInstance?.token ?? '').post(
+        this.keycloakBaseAccountApiUrl,
+        profile,
+        { signal: signal }
+      );
     },
     async getUser(userId: string) {
       return await createAxios(this.keycloakInstance?.token ?? '')
-        .get<KeycloakUser>(`${this.keycloakBaseApiUrl}/users/${userId}`)
+        .get<KeycloakUser>(`${this.keycloakBaseAdminApiUrl}/users/${userId}`)
         .then((response) => {
           return response.data;
         });
@@ -77,9 +88,12 @@ export const useKeyCloakStore = defineStore('keycloak', {
     ): Promise<number> {
       const searchParam = search ? `?search=${search}` : '';
       return await createAxios(this.keycloakInstance?.token ?? '')
-        .get<number>(`${this.keycloakBaseApiUrl}/users/count${searchParam}`, {
-          signal: signal,
-        })
+        .get<number>(
+          `${this.keycloakBaseAdminApiUrl}/users/count${searchParam}`,
+          {
+            signal: signal,
+          }
+        )
         .then((response) => {
           return response.data;
         });
@@ -93,7 +107,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
       const searchParam = search ? `&search=${search}` : '';
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<KeycloakUser[]>(
-          `${this.keycloakBaseApiUrl}/users/?first=${offset}&max=${max}${searchParam}`,
+          `${this.keycloakBaseAdminApiUrl}/users/?first=${offset}&max=${max}${searchParam}`,
           {
             signal: signal,
           }
@@ -102,9 +116,9 @@ export const useKeyCloakStore = defineStore('keycloak', {
           return response.data;
         });
     },
-    async updateUser(userId: string, user: KeycloakUser) {
+    async updateUser(userId: string, user: KeycloakProfile) {
       return await createAxios(this.keycloakInstance?.token ?? '')
-        .put(`${this.keycloakBaseApiUrl}/users/${userId}`, user)
+        .put(`${this.keycloakBaseAdminApiUrl}/users/${userId}`, user)
         .then((response) => {
           const newUser = JSON.parse(response.config.data) as KeycloakUser;
           return newUser;
@@ -113,7 +127,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
     async loadUserGroups(userId: string | undefined): Promise<KeycloakGroup[]> {
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<KeycloakGroup[]>(
-          `${this.keycloakBaseApiUrl}/users/${userId}/groups`
+          `${this.keycloakBaseAdminApiUrl}/users/${userId}/groups`
         )
         .then((response) => {
           return response.data;
@@ -121,7 +135,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
     },
     async loadGroup(groupId: string): Promise<KeycloakGroup> {
       return await createAxios(this.keycloakInstance?.token ?? '')
-        .get<KeycloakGroup>(`${this.keycloakBaseApiUrl}/groups/${groupId}`)
+        .get<KeycloakGroup>(`${this.keycloakBaseAdminApiUrl}/groups/${groupId}`)
         .then((response) => {
           return response.data;
         });
@@ -133,7 +147,7 @@ export const useKeyCloakStore = defineStore('keycloak', {
 
       return await createAxios(this.keycloakInstance?.token ?? '')
         .get<KeycloakGroupMember[]>(
-          `${this.keycloakBaseApiUrl}/groups/${groupId}/members`
+          `${this.keycloakBaseAdminApiUrl}/groups/${groupId}/members`
         )
         .then((response) => {
           const members = response.data;
@@ -146,14 +160,14 @@ export const useKeyCloakStore = defineStore('keycloak', {
       if (!groupId) return;
 
       await createAxios(this.keycloakInstance?.token ?? '').put(
-        `${this.keycloakBaseApiUrl}/users/${userId}/groups/${groupId}`
+        `${this.keycloakBaseAdminApiUrl}/users/${userId}/groups/${groupId}`
       );
     },
     async removeUserFromGroup(userId: string, groupId: string | undefined) {
       if (!groupId) return;
 
       await createAxios(this.keycloakInstance?.token ?? '').delete(
-        `${this.keycloakBaseApiUrl}/users/${userId}/groups/${groupId}`
+        `${this.keycloakBaseAdminApiUrl}/users/${userId}/groups/${groupId}`
       );
     },
   },
