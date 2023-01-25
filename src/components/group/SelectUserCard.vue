@@ -13,9 +13,9 @@
         </template>
       </q-input>
     </q-card-section>
-    <q-card-section class="scroll">
+    <q-card-section>
       <InfiniteVirtualList :virtual-options="{ itemHeight: 44 }" :load-more="(skip) => loadMore(skip)"
-        :max-count="maxCount" v-slot="slotProps">
+        :max-count="maxCount" v-slot="slotProps" class="infinite-scroll scroll">
         <div v-for="{ index, data } in slotProps.list" :key="index">
           <q-item :key="(data as KeycloakUser).id" dense v-ripple tag="label">
             <q-item-section side top>
@@ -121,8 +121,10 @@ const onCancel = () => {
 
 <style scoped lang="scss">
 .container {
-  width: 80vw;
-  max-width: 500px;
-  max-height: 600px;
+  width: min(500px, 80vw);
+}
+
+.infinite-scroll {
+  max-height: 400px;
 }
 </style>
