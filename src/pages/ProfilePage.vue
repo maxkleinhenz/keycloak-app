@@ -18,7 +18,7 @@
 
       <q-tab-panels v-model="selectedTab" animated>
         <q-tab-panel name="groups">
-          <GroupList :userId="user.id" :clickable="keycloakStore.canQueryGroups"></GroupList>
+          <UserGroupList :userId="user.id" :clickable="keycloakStore.canQueryGroups"></UserGroupList>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -34,6 +34,7 @@ import PageTitle from 'src/components/common/PageTitle.vue';
 import UserProfile from 'src/components/user/UserProfile.vue';
 import { KeycloakProfile } from 'keycloak-js';
 import { QForm } from 'quasar';
+import UserGroupList from 'src/components/user/UserGroupList.vue';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();

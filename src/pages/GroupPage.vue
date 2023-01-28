@@ -1,37 +1,7 @@
 <template>
   <q-page>
     <PageTitle :headline="group?.name ?? ''" tagline="Gruppe" :enable-edit="false"></PageTitle>
-    <div class="row">
-      <div class="col-12">
-        <q-field borderless label="Id" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ group?.id ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12 col-sm-6">
-        <q-field borderless label="Name" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ group?.name ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-12 col-sm-6">
-        <q-field borderless label="Pfad" stack-label>
-          <template v-slot:control>
-            <div class="text-content full-width no-outline" tabindex="0">
-              {{ group?.path ?? '-' }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-    </div>
+    <GroupProfile :group="group"></GroupProfile>
 
     <div class="q-mt-xl">
       <q-tabs v-model="selectedTab" dense class="text-grey" active-color="primary" indicator-color="primary"
@@ -47,7 +17,7 @@
           <GroupMemberList :members="members" :group="group" @refresh="handleRefresh"></GroupMemberList>
         </q-tab-panel>
         <q-tab-panel name="subgroups">
-          <GroupList :groups="group?.subGroups"></GroupList>
+          <GroupList :loading="loading" :clickable="true" :groups="group?.subGroups"></GroupList>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -58,9 +28,10 @@
 import { KeycloakGroupMember } from 'src/models/KeycloackGroupMember';
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import GroupMemberList from 'src/components/group/GroupMemberList.vue';
+import GroupProfile from 'src/components/group/GroupProfile.vue';
 import GroupList from 'src/components/group/GroupList.vue';
 import PageTitle from 'src/components/common/PageTitle.vue';
 
@@ -69,30 +40,33 @@ const keycloakStore = useKeyCloakStore();
 const group = ref<KeycloakGroup>();
 const members = ref<KeycloakGroupMember[]>();
 const selectedTab = ref('members');
+const loading = ref(true);
 
 watch(
   () => route.params.groupId,
   () => {
     reload();
-  }
+  }, { immediate: true }
 );
 
-onMounted(async () => {
-  reload();
-});
-
-const reload = async () => {
+async function reload() {
   if (route.params.groupId) {
-    const groupId = route.params.groupId as string;
-    const groupPromise = keycloakStore.loadGroup(groupId);
-    const membersPromise = keycloakStore.loadGroupMember(groupId);
+    try {
+      loading.value = true;
 
-    group.value = await groupPromise;
-    members.value = await membersPromise;
+      const groupId = route.params.groupId as string;
+      const groupPromise = keycloakStore.loadGroup(groupId);
+      const membersPromise = keycloakStore.loadGroupMember(groupId);
+
+      group.value = await groupPromise;
+      members.value = await membersPromise;
+    } finally {
+      loading.value = false;
+    }
   }
 };
 
-const handleRefresh = async () => {
+async function handleRefresh() {
   await reload();
 };
 </script>
