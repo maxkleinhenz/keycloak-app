@@ -5,59 +5,27 @@
       <p class="text-body2">
         Es können neue Mitglieder hinzugefügt, oder vorhandene entfernt werden.
       </p>
-      <q-input
-        rounded
-        outlined
-        dense
-        v-model="searchText"
-        placeholder="Nach Namen oder E-Mail-Adressen suchen"
-        @keydown.enter="search"
-      >
+      <q-input rounded outlined dense v-model="searchText" placeholder="Nach Namen oder E-Mail-Adressen suchen"
+        @keydown.enter="search">
         <template v-slot:append>
-          <q-btn
-            v-if="searchText !== ''"
-            icon="close"
-            @click="resetSearch"
-            class="cursor-pointer"
-            flat
-            round
-            dense
-          />
-          <q-btn
-            icon="search"
-            @click="search"
-            class="cursor-pointer"
-            flat
-            round
-            dense
-          />
+          <q-btn v-if="searchText !== ''" icon="close" @click="resetSearch" class="cursor-pointer" flat round dense />
+          <q-btn icon="search" @click="search" class="cursor-pointer" flat round dense />
         </template>
       </q-input>
     </q-card-section>
-    <q-card-section class="scroll">
-      <InfiniteVirtualList
-        :virtual-options="{ itemHeight: 44 }"
-        :load-more="(skip) => loadMore(skip)"
-        :max-count="maxCount"
-        v-slot="slotProps"
-      >
+    <q-card-section>
+      <InfiniteVirtualList :virtual-options="{ itemHeight: 44 }" :load-more="(skip) => loadMore(skip)"
+        :max-count="maxCount" v-slot="slotProps" class="infinite-scroll scroll">
         <div v-for="{ index, data } in slotProps.list" :key="index">
           <q-item :key="(data as KeycloakUser).id" dense v-ripple tag="label">
             <q-item-section side top>
-              <q-checkbox
-                v-model="selectedUsers"
-                :val="(data as KeycloakUser).id"
-                :toggle-indeterminate="false"
-              />
+              <q-checkbox v-model="selectedUsers" :val="(data as KeycloakUser).id" :toggle-indeterminate="false" />
             </q-item-section>
 
             <q-item-section>
-              <q-item-label
-                >{{ (data as KeycloakUser).firstName }}
-                {{ (data as KeycloakUser).lastName }}</q-item-label
-              >
-              <q-item-label caption
-                >{{ (data as KeycloakUser).username }}
+              <q-item-label>{{ (data as KeycloakUser).firstName }}
+                {{ (data as KeycloakUser).lastName }}</q-item-label>
+              <q-item-label caption>{{ (data as KeycloakUser).username }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -66,12 +34,7 @@
     </q-card-section>
     <q-card-actions align="right">
       <q-btn flat label="Abbrechen" @click="onCancel" />
-      <q-btn
-        flat
-        :label="props.okButtonLabel"
-        color="primary"
-        @click="onSelect"
-      />
+      <q-btn flat :label="props.okButtonLabel" color="primary" @click="onSelect" />
     </q-card-actions>
   </q-card>
 </template>
@@ -80,7 +43,7 @@
 import { KeycloakUser } from 'src/models/KeycloakUser';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { onMounted, ref, PropType } from 'vue';
-import InfiniteVirtualList from './InfiniteVirtualList.vue';
+import InfiniteVirtualList from '../common/InfiniteVirtualList.vue';
 
 const props = defineProps({
   title: {
@@ -158,8 +121,10 @@ const onCancel = () => {
 
 <style scoped lang="scss">
 .container {
-  width: 80vw;
-  max-width: 500px;
-  max-height: 600px;
+  width: min(500px, 80vw);
+}
+
+.infinite-scroll {
+  max-height: 400px;
 }
 </style>

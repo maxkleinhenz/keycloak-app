@@ -1,42 +1,24 @@
 <template>
   <q-page>
-    <q-form @submit="onSubmit">
-      <PageTitle
-        :headline="pageHeader"
-        :tagline="myProfile ? 'Mein Profil' : 'Profil'"
-        :show-edit-button="myProfile"
-        @on-edit-click="setEditMode(true)"
-        @on-edit-cancel-click="setEditMode(false)"
-      ></PageTitle>
+    <q-form @submit="onSubmit" ref="userformRef">
+      <PageTitle :headline="pageHeader" :tagline="myProfile ? 'Mein Profil' : 'Profil'" :enable-edit="myProfile"
+        :edit-mode="editMode" @edit="editMode = true" @cancel="editMode = false" @save="userformRef?.submit()">
+      </PageTitle>
 
-      <UserProfile
-        :user="editUser ?? user"
-        :edit-mode="!!editUser"
-      ></UserProfile>
+      <UserProfile v-model="editUser" :edit-mode="editMode"></UserProfile>
     </q-form>
 
     <div class="q-mt-xl">
-      <q-tabs
-        v-model="selectedTab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="left"
-        inline-label
-      >
-        <q-tab
-          name="groups"
-          icon="groups"
-          :label="myProfile ? 'Meine Gruppen' : 'Gruppen'"
-        />
+      <q-tabs v-model="selectedTab" dense class="text-grey" active-color="primary" indicator-color="primary"
+        align="left" inline-label>
+        <q-tab name="groups" icon="groups" :label="myProfile ? 'Meine Gruppen' : 'Gruppen'" />
       </q-tabs>
 
       <q-separator />
 
       <q-tab-panels v-model="selectedTab" animated>
         <q-tab-panel name="groups">
-          <GroupList :groups="groups"></GroupList>
+          <GroupList :userId="user.id" :clickable="keycloakStore.canQueryGroups"></GroupList>
         </q-tab-panel>
       </q-tab-panels>
     </div>
@@ -44,20 +26,25 @@
 </template>
 
 <script setup lang="ts">
-import { KeycloakGroup } from 'src/models/KeycloakGroup';
-import { KeycloakUser } from 'src/models/KeycloakUser';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import GroupList from '../components/GroupList.vue';
-import PageTitle from 'src/components/PageTitle.vue';
-import UserProfile from 'src/components/UserProfile.vue';
+import GroupList from '../components/group/GroupList.vue';
+import PageTitle from 'src/components/common/PageTitle.vue';
+import UserProfile from 'src/components/user/UserProfile.vue';
+import { KeycloakProfile } from 'keycloak-js';
+import { QForm } from 'quasar';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
-const user = ref<KeycloakUser>();
-const groups = ref<KeycloakGroup[]>();
+const user = ref<KeycloakProfile>({} as KeycloakProfile);
 const store = useKeyCloakStore();
+
+const userformRef = ref<null | QForm>(null);
+
+const editMode = ref(false);
+const editUser = ref<KeycloakProfile>({} as KeycloakProfile);
+let editAbortController: AbortController | undefined = undefined;
 
 const pageHeader = computed(() => {
   if (user.value?.firstName && user.value.lastName)
@@ -70,37 +57,37 @@ const myProfile = computed(
 );
 const selectedTab = ref('groups');
 
-onMounted(async () => {
-  await reload();
-});
+const reload = async () => {
+  if (myProfile.value) {
+    await keycloakStore.loadProfile();
+    user.value = keycloakStore.profile ?? {};
+  } else {
+    user.value = await keycloakStore.getUser(route.params.userId as string);
+  }
+  editUser.value = { ...user.value } as KeycloakProfile;
+};
 
 watch(
   () => route.params.userId,
   () => {
     reload();
-  }
+  }, { immediate: true }
 );
 
-const reload = async () => {
-  if (route.params.userId) {
-    user.value = await keycloakStore.getUser(route.params.userId as string);
-  } else {
-    await keycloakStore.loadProfile();
-    user.value = keycloakStore.profile;
-  }
-  groups.value = await keycloakStore.loadUserGroups(user.value?.id);
-};
-
-const editUser = ref<KeycloakUser | undefined>(undefined);
-const setEditMode = (mode: boolean) => {
-  if (mode) editUser.value = { ...user.value } as KeycloakUser;
-  else editUser.value = undefined;
-};
-
 const onSubmit = async () => {
-  if (user.value?.id && editUser.value) {
+  if (!user.value?.id || !editMode.value)
+    return;
+
+  editAbortController?.abort();
+  editAbortController = new AbortController();
+
+  if (myProfile.value) {
+    await store.updateProfile(editAbortController.signal, editUser.value)
+    await reload();
+  }
+  else {
     user.value = await store.updateUser(user.value.id, editUser.value);
   }
-  setEditMode(false);
+  editMode.value = false;
 };
 </script>

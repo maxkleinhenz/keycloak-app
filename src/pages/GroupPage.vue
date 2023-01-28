@@ -1,10 +1,6 @@
 <template>
   <q-page>
-    <PageTitle
-      :headline="group?.name ?? ''"
-      tagline="Gruppe"
-      :show-edit-button="false"
-    ></PageTitle>
+    <PageTitle :headline="group?.name ?? ''" tagline="Gruppe" :enable-edit="false"></PageTitle>
     <div class="row">
       <div class="col-12">
         <q-field borderless label="Id" stack-label>
@@ -38,15 +34,8 @@
     </div>
 
     <div class="q-mt-xl">
-      <q-tabs
-        v-model="selectedTab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="left"
-        inline-label
-      >
+      <q-tabs v-model="selectedTab" dense class="text-grey" active-color="primary" indicator-color="primary"
+        align="left" inline-label>
         <q-tab name="members" icon="group" label="Mitglieder" />
         <q-tab name="subgroups" icon="account_tree" label="Untergruppen" />
       </q-tabs>
@@ -55,11 +44,7 @@
 
       <q-tab-panels v-model="selectedTab" animated>
         <q-tab-panel name="members">
-          <GroupMemberList
-            :members="members"
-            :group="group"
-            @refresh="handleRefresh"
-          ></GroupMemberList>
+          <GroupMemberList :members="members" :group="group" @refresh="handleRefresh"></GroupMemberList>
         </q-tab-panel>
         <q-tab-panel name="subgroups">
           <GroupList :groups="group?.subGroups"></GroupList>
@@ -75,9 +60,9 @@ import { KeycloakGroup } from 'src/models/KeycloakGroup';
 import { useKeyCloakStore } from 'src/stores/keycloak-store';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import GroupMemberList from 'src/components/GroupMemberList.vue';
-import GroupList from 'src/components/GroupList.vue';
-import PageTitle from 'src/components/PageTitle.vue';
+import GroupMemberList from 'src/components/group/GroupMemberList.vue';
+import GroupList from 'src/components/group/GroupList.vue';
+import PageTitle from 'src/components/common/PageTitle.vue';
 
 const route = useRoute();
 const keycloakStore = useKeyCloakStore();
