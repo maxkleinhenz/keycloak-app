@@ -3,7 +3,7 @@
     <q-spinner color="primary" size="2em" /> Gruppen werden geladen
   </div>
   <template v-else>
-    <div v-if="!groups?.length ?? 0"><q-icon name="close" color="primary" size="2em" /> Keine Gruppen zugewiesen</div>
+    <div v-if="!groups?.length ?? 0"><q-icon name="close" color="primary" size="2em" /> Keine Gruppen</div>
     <template v-else>
       <q-list v-if="clickable">
         <q-item v-for="group in groups" :key="group.id" clickable v-ripple :title="group.path + ' anzeigen'" :to="{
@@ -29,34 +29,15 @@
 
 <script setup lang="ts">
 import { KeycloakGroup } from 'src/models/KeycloakGroup';
-import { useKeyCloakStore } from 'src/stores/keycloak-store';
-import { ref, toRefs, watch } from 'vue';
+import { toRefs } from 'vue';
 
 export interface Props {
-  userId?: string,
-  clickable?: boolean
+  loading: boolean,
+  clickable?: boolean,
+  groups?: KeycloakGroup[]
 }
 const props = defineProps<Props>()
-
-const keycloakStore = useKeyCloakStore();
-const groups = ref<KeycloakGroup[] | undefined>(undefined);
-const loading = ref(true);
-
-const { userId, clickable } = toRefs(props);
-watch([userId, clickable], async ([userId, clickable]) => {
-  try {
-    loading.value = true;
-    if (userId && clickable) {
-      groups.value = await keycloakStore.loadUserGroups(userId.toString());
-    }
-    else {
-      groups.value = keycloakStore.userInfo?.group_membership.map((g) => <KeycloakGroup>{ id: g, name: g, path: g, subGroups: [] })
-    }
-  }
-  finally {
-    loading.value = false;
-  }
-});
+const { loading, clickable, groups } = toRefs(props);
 
 </script>
 
