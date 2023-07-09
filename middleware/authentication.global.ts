@@ -1,5 +1,7 @@
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   const { status, signIn } = useAuth();
+
+  if (to.path === '/') return;
 
   // Return immediately if user is already authenticated
   if (status.value === 'authenticated') {
