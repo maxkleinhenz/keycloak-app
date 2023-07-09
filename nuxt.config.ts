@@ -15,5 +15,5 @@ export default defineNuxtConfig({
   build: {
     transpile: ['primevue'],
   },
-  modules: ['nuxt-icon'],
+  modules: ['@sidebase/nuxt-auth', 'nuxt-icon'],
 });
