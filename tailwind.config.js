@@ -1,27 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './components/**/*.{js,vue,ts}',
-    './layouts/**/*.vue',
-    './pages/**/*.vue',
-    './plugins/**/*.{js,ts}',
-    './nuxt.config.{js,ts}',
-    './app.vue',
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx,vue}'],
   theme: {
-    extend: {
-      colors: {
-        juso: {
-          beere: 'rgb(var(--juso-beere) / <alpha-value>)',
-          'hell-lila': 'rgb(var(--juso-hell-lila) / <alpha-value>)',
-          rosa: 'rgb(var(--juso-rosa) / <alpha-value>)',
-          rot: 'rgb(var(--juso-rot) / <alpha-value>)',
-          orange: 'rgb(var(--juso-orange) / <alpha-value>)',
-          creme: 'rgb(var(--juso-creme) / <alpha-value>)',
-          traube: 'rgb(var(--juso-traube) / <alpha-value>)',
-        },
-      },
+    extend: {},
+    screens: {
+      xs: { min: '0px', max: '599.99px' },
+      sm: { min: '600px', max: '1023.99px' },
+      md: { min: '1024px', max: '1439.99px' },
+      lg: { min: '1440px', max: '1919.99px' },
+      xl: { min: '1920px' },
     },
   },
   plugins: [],
+  prefix: 'tw-',
+  corePlugins: {
+    preflight: false,
+  },
 };
