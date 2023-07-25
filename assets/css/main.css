@@ -1,3 +1,6 @@
+@import url('primevue/resources/themes/tailwind-light/theme.css');
+@import url('primevue/resources/primevue.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
