@@ -1,11 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  css: [
-    '~/assets/css/main.css',
-    'primevue/resources/themes/tailwind-light/theme.css',
-    'primevue/resources/primevue.css',
-  ],
+  css: ['~/assets/css/main.css'],
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -15,5 +11,8 @@ export default defineNuxtConfig({
   build: {
     transpile: ['primevue'],
   },
-  modules: ['@sidebase/nuxt-auth', 'nuxt-icon'],
+  modules: ['@sidebase/nuxt-auth', 'nuxt-icon', '@pinia/nuxt'],
+  runtimeConfig: {
+    public: { AUTH_ISSUER: process.env.AUTH_ISSUER },
+  },
 });
