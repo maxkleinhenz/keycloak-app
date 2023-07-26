@@ -30,7 +30,7 @@
 import { useKeycloakStore } from "~~/stores/keycloak.store";
 
 const store = useKeycloakStore()
-const { data: profile } = await useAsyncData('user', () => store.getUserInfo())
+const { data: profile } = await store.getUserInfo()
 
 const editMode = ref(false);
 
