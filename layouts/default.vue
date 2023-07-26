@@ -1,14 +1,30 @@
 <script lang="ts" setup>
-import { computedAsync } from '@vueuse/core'
+import Menu from "primevue/menu";
+import { MenuItem } from "primevue/menuitem";
+import { useKeycloakStore } from "~~/stores/keycloak.store";
 
-const { status, getSession } = useAuth();
+const { signOut } = useAuth();
 
-const session = computedAsync(
-  async () => {
-    return await getSession()
+const store = useKeycloakStore()
+const { data: profile } = await store.getUserInfo()
+
+const menuItems: MenuItem[] = [
+  {
+    label: "Profil",
+    icon: "ic:baseline-account-circle",
+    to: "/profil",
   },
-  null, // initial state
-)
+  {
+    separator: true
+  },
+  {
+    label: "Logout",
+    icon: "ic:baseline-logout",
+    command: () => signOut(),
+  }
+]
+
+const menu = ref<Menu>();
 
 </script>
 
@@ -16,10 +32,29 @@ const session = computedAsync(
   <div class="flex flex-col h-screen">
     <div class="bg-juso-rot p-3 flex flex-row items-center shadow-lg">
       <AppButton to="/" intent="link" shape="default" class="text-white">Gruppenverwaltung</AppButton>
-      <div v-if="status === 'authenticated' && session?.user" class="flex justify-end flex-1">
-        <AppButton intent="tertiary" shape="pill" class="text-white">
-          <AppIcon name="ic:baseline-account-circle" /> <span class="hidden sm:inline">{{ session?.user?.name }}</span>
+      <div v-if="profile?.preferred_username" class="flex justify-end flex-1">
+        <AppButton intent="tertiary" shape="pill" class="text-white" @click="(e) => menu?.toggle(e)">
+          <AppIcon name="ic:baseline-account-circle" /> <span class="hidden sm:inline">{{ profile?.preferred_username
+          }}</span>
         </AppButton>
+        <!-- <Menu ref="menu" :model="menuItems" :popup="true" /> -->
+        <Menu ref="menu" :model="menuItems" :popup="true">
+          <template #item="{ item }">
+            <template v-if="item.to" :id="id + '_' + i">
+              <AppButton intent="default" :to="item.to">
+                <AppIcon v-if="item.icon" :name="item.icon" /> {{ item.label }}
+              </AppButton>
+            </template>
+            <template v-else-if="item.command" :id="id + '_' + i">
+              <AppButton intent="default" @click="item.command">
+                <AppIcon v-if="item.icon" :name="item.icon" /> {{ item.label }}
+              </AppButton>
+            </template>
+            <template v-else-if="item.separator">
+              <hr />
+            </template>
+          </template>
+        </Menu>
       </div>
     </div>
     <div class=" flex-1">
@@ -28,5 +63,3 @@ const session = computedAsync(
 
   </div>
 </template>
-
-<style scoped></style>

@@ -1,5 +1,5 @@
 <template>
-  <InputText v-if="editMode" :id="label" v-model="value" :size="'small'" class="rounded-full" />
+  <InputText v-if="editMode" :id="label" v-model="value" class="rounded-full" />
   <p v-else :id="label">{{ value }}</p>
 </template>
 
