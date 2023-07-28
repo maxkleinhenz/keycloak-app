@@ -24,7 +24,7 @@
     "class-variance-authority": "^0.6.1",
     "nuxt-icon": "^0.4.2",
     "pinia": "^2.1.4",
-    "primevue": "^3.29.2"
+    "primevue": "^3.31.0"
   },
   "overrides": {
     "vue": "latest"

@@ -1,6 +1,6 @@
 import { getServerSession } from '#auth';
-import { Session } from '../../types/session.model';
-import { UserInfo } from '../../types/userInfo.model';
+import { Session } from '../../../types/session.model';
+import { UserInfo } from '../../../types/userInfo.model';
 
 export default defineEventHandler(async (event) => {
   const sessionResult = await getServerSession(event);
@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   if (!session) return { status: 'unauthenticated!' };
 
   const response = await $fetch(
-    'https://login.rote.tools/realms/test/protocol/openid-connect/userinfo',
+    `${process.env.AUTH_ISSUER}/protocol/openid-connect/userinfo`,
     {
       method: 'GET',
       headers: {

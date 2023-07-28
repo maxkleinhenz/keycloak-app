@@ -15,4 +15,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: { AUTH_ISSUER: process.env.AUTH_ISSUER },
   },
+  typescript: {
+    strict: true,
+  },
+  imports: {
+    dirs: ['stores'],
+  },
 });
