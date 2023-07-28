@@ -1,0 +1,22 @@
+.p-tabview .p-tabview-panels {
+  @apply !p-0;
+}
+
+.p-tabview .p-tabview-nav .p-tabview-nav-link {
+  @apply !shadow-none;
+}
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  @apply !border-juso-rot !text-juso-rot;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  @apply !border-juso-rot !text-juso-rot;
+}
+
+.p-listbox-list .p-listbox-item {
+  @apply !p-1;
+}
+
+.p-inputswitch .p-inputswitch-slider {
+  @apply !bg-juso-rot;
+}
