@@ -25,6 +25,10 @@ export default NuxtAuthHandler({
   session: {
     strategy: 'jwt',
   },
+  jwt: {
+    secret: process.env.AUTH_SECRET,
+  },
+
   callbacks: {
     async jwt({ token, user, account }) {
       const myToken = token as Token;
@@ -36,6 +40,7 @@ export default NuxtAuthHandler({
           expires_at: Math.floor(
             Date.now() / 1000 + (account.expires_in as number)
           ),
+          //exp: Math.floor(Date.now() / 1000 + (account.exp as number)),
           refresh_token: account.refresh_token,
         };
       } else if (Date.now() < myToken.expires_at * 1000) {
@@ -61,12 +66,12 @@ export default NuxtAuthHandler({
           );
 
           const refreshResponse = await response.json();
-
           if (!response.ok) throw refreshResponse;
 
           const result = {
             ...token, // Keep the previous token properties
             access_token: refreshResponse.access_token,
+            exp: Math.floor(Date.now() / 1000 + refreshResponse.exp),
             expires_at: Math.floor(
               Date.now() / 1000 + refreshResponse.expires_in
             ),
@@ -82,6 +87,7 @@ export default NuxtAuthHandler({
         }
       }
     },
+
     async session({ session, token }) {
       session.user = {
         ...session.user,
@@ -93,6 +99,12 @@ export default NuxtAuthHandler({
 });
 
 type Token = {
+  access_token: string;
+  iat: Date;
+  exp: Date;
+  jti: number;
+  refresh_token: string;
+  refresh_expires_in: number;
   name: string;
   email: string;
   sub: string;
@@ -100,16 +112,10 @@ type Token = {
   provider: string;
   type: string;
   providerAccountId: string;
-  access_token: string;
   expires_at: number;
-  refresh_expires_in: number;
-  refresh_token: string;
   token_type: string;
   id_token: string;
   'not-before-policy': number;
   session_state: string;
   scope: string;
-  iat: Date;
-  exp: Date;
-  jti: string;
 };

@@ -2,7 +2,7 @@
   <div>
     <Listbox :options="groups" class="w-full border-none !shadow-none">
       <template #option="slotProps">
-        <component :is="listItem" :class="itemClasses" intent="default">
+        <component :is="listItem" class="flex w-full" intent="default" :to="groupLink(slotProps.option.id)">
           <div class="flex-1 text-left">
             {{ slotProps.option.name }}
           </div>
@@ -20,10 +20,10 @@
 </template>
 
 <script setup lang="ts">
-import { twMerge } from 'tailwind-merge';
+import { Group } from 'types/groups.model';
 
 const props = defineProps<{
-  groups?: { name: string }[];
+  groups?: Group[];
   navigable?: boolean;
 }>();
 
@@ -32,11 +32,5 @@ const listItem = computed(() => {
   return 'p';
 });
 
-const itemClasses = computed(() => {
-  let classes = 'flex w-full';
-  if (!props.navigable) {
-    classes += ' px-4 py-2 sm:py-3 sm:px-5';
-  }
-  return twMerge(classes);
-});
+const groupLink = computed(() => (groupId: string) => props.navigable ? "/gruppe/" + groupId : undefined);
 </script>

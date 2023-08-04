@@ -25,7 +25,7 @@
     <div>
       <TabView>
         <TabPanel header="Gruppen">
-          <GroupList :groups="groups" :navigable="canUserViewGroups" />
+          <GroupList :groups="groups" :navigable="canViewGroups" />
         </TabPanel>
         <TabPanel header="Gruppen2">
           <GroupList :navigable="true" />
@@ -36,18 +36,21 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { computedAsync } from '@vueuse/core';
+import { Group } from 'types/groups.model';
+
+const { getUserInfo, getUserGroup, canViewGroups } = useKeycloakState()
+const profile = await getUserInfo()
 
 const editMode = ref(false);
 
-const store = useKeycloakStore();
-const { canUserViewGroups } = storeToRefs(store);
-const { data: profile } = await store.getUserInfo();
-
-const groups = computed(() => {
-  if (profile.value?.group_membership) {
+const groups = computedAsync(async () => {
+  if (canViewGroups.value) {
+    return (await getUserGroup()).value
+  }
+  else if (profile.value?.group_membership) {
     return profile.value.group_membership.map((g) => {
-      return { name: g };
+      return { id: "0", name: g } as Group;
     });
   }
   return undefined;

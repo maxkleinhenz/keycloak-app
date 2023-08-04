@@ -6,52 +6,67 @@ export const useKeycloakStore = defineStore('keycloak', () => {
   const userInfo = ref<UserInfo | undefined>(undefined);
   const userGroups = ref<Group[] | undefined>(undefined);
 
-  const getUserInfo = () =>
-    useAsyncData('userInfo', async () => {
-      if (userInfo.value) return userInfo.value;
+  // const getUserInfo = () =>
+  //   useAsyncData('userInfo', async () => {
+  //     if (userInfo.value) return userInfo.value;
 
-      const data = await fetchUserInfo();
-      userInfo.value = data;
+  //     const data = await fetchUserInfo();
+  //     userInfo.value = data;
 
-      return userInfo.value;
-    });
+  //     console.log('userInfo', userInfo.value);
+  //     return userInfo.value;
+  //   });
 
-  const getUserGroups = async () =>
-    useAsyncData(`user:groups`, async () => {
-      const userInfo = await getUserInfo();
-      const userId = userInfo.data.value?.sub;
+  // const canUserViewGroups = computed(
+  //   () =>
+  //     userInfo.value?.resource_access?.account?.roles?.includes(
+  //       'view-groups'
+  //     ) ?? false
+  // );
 
-      if (!userId) {
-        console.error('no user id');
-        return;
-      }
+  // const getUserGroups = async () =>
+  //   useAsyncData(`user:groups`, async () => {
+  //     const userInfo = await getUserInfo();
+  //     const userId = userInfo.data.value?.sub;
 
-      if (userGroups.value) return userGroups.value;
+  //     if (!userId) {
+  //       console.error('no user id');
+  //       return;
+  //     }
 
-      const data = await fetchUserGroups(userId);
-      userGroups.value = data;
+  //     if (userGroups.value) return userGroups.value;
 
-      return userGroups.value;
-    });
+  //     const data = await fetchUserGroups(userId);
+  //     userGroups.value = data;
 
-  const canUserViewGroups = computed(
-    () =>
-      userInfo.value?.resource_access?.account?.roles?.includes(
-        'view-groups'
-      ) ?? false
-  );
+  //     return userGroups.value;
+  //   });
 
-  const getHeaders = () => useRequestHeaders(['cookie']) as HeadersInit;
+  // const getGroup = async (groupId: string) =>
+  //   useAsyncData(`groups:${groupId}`, async () => {
+  //     const data = await fetchGroup(groupId);
+  //     return data;
+  //   });
 
-  const fetchUserInfo = async () => {
+  // const getHeaders = () => useRequestHeaders(['cookie']) as HeadersInit;
+
+  // const fetchUserInfo = async () => {
+  //   const headers = getHeaders();
+  //   const data = await $fetch<UserInfo>('/api/user', { headers });
+  //   return data;
+  // };
+
+  // const fetchUserGroups = async (userId: string) => {
+  //   const headers = getHeaders();
+  //   const data = await $fetch<Group[]>(`/api/user/${userId}/groups`, {
+  //     headers,
+  //   });
+  //   return data;
+  // };
+
+  const fetchGroup = async (groupId: string) => {
     const headers = getHeaders();
-    const data = await $fetch<UserInfo>('/api/user', { headers });
-    return data;
-  };
-
-  const fetchUserGroups = async (userId: string) => {
-    const headers = getHeaders();
-    const data = await $fetch<Group[]>(`/api/user/${userId}/groups`, {
+    const data = await $fetch<Group>(`/api/groups/${groupId}`, {
       headers,
     });
     return data;
@@ -60,8 +75,8 @@ export const useKeycloakStore = defineStore('keycloak', () => {
   return {
     userInfo,
     userGroups,
-    canUserViewGroups,
-    getUserInfo,
-    getUserGroups,
+    // canUserViewGroups,
+    // getUserInfo,
+    //getGroup,
   };
 });
