@@ -17,6 +17,9 @@
 
     <div>
       <TabView>
+        <TabPanel header="Mitglieder">
+          <GroupMemberList :group-id="groupId" :navigable="true" />
+        </TabPanel>
         <TabPanel header="Untergruppen">
           <GroupList :groups="group?.subGroups" :navigable="true" />
         </TabPanel>
@@ -28,9 +31,9 @@
 <script setup lang="ts">
 const route = useRoute();
 
-const groupId = route.params.groupId.toString();
-const { fetchGroups } = useKeycloakApi();
-const { data: group } = await fetchGroups(groupId);
+const groupId = ref(route.params.groupId.toString());
+const { fetchGroups } = useKeycloakApi()
+const { data: group } = await fetchGroups(groupId.value)
 
 const editMode = ref(false);
 

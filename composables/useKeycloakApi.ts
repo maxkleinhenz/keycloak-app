@@ -1,4 +1,6 @@
+import { GroupMember } from 'types/group-member.model';
 import { Group } from 'types/groups.model';
+import { User } from 'types/user.model';
 import { UserInfo } from 'types/userInfo.model';
 
 export const useKeycloakApi = () => {
@@ -6,12 +8,13 @@ export const useKeycloakApi = () => {
 
   const fetchKeycloak = <T>(url: string) => {
     const { data } = useAuth();
-
+    console.log('fetch', url);
     const accessToken = (data.value?.user as any)?.access_token as
       | string
       | undefined;
     return useFetch<T>(url, {
       // server: false,
+      cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'bearer ' + accessToken,
@@ -24,6 +27,12 @@ export const useKeycloakApi = () => {
       `${config.public.AUTH_ISSUER}/protocol/openid-connect/userinfo`
     );
 
+  const fetchUser = (userId: string) => {
+    const url = `${config.public.KEYCLOAK_ADMIN_API}/users/${userId}`;
+    console.log('fetchUser', url);
+    return fetchKeycloak<User>(url);
+  };
+
   const fetchUserGroups = async (userId: string) =>
     fetchKeycloak<Group[]>(
       `${config.public.KEYCLOAK_ADMIN_API}/users/${userId}/groups`
@@ -32,6 +41,11 @@ export const useKeycloakApi = () => {
   const fetchGroups = async (groupId: string) =>
     fetchKeycloak<Group>(
       `${config.public.KEYCLOAK_ADMIN_API}/groups/${groupId}`
+    );
+
+  const fetchGroupMembers = async (groupId: string) =>
+    fetchKeycloak<GroupMember[]>(
+      `${config.public.KEYCLOAK_ADMIN_API}/groups/${groupId}/members`
     );
 
   // const fetchUserGroups = (userId: string) =>
@@ -68,5 +82,11 @@ export const useKeycloakApi = () => {
   //   });
   // };
 
-  return { fetchUserInfo, fetchUserGroups, fetchGroups };
+  return {
+    fetchUserInfo,
+    fetchUser,
+    fetchUserGroups,
+    fetchGroups,
+    fetchGroupMembers,
+  };
 };
