@@ -5,11 +5,13 @@
 
 <script setup lang="ts">
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   label: string
   modelValue?: string
-  editMode: boolean,
-}>()
+  editMode?: boolean,
+}>(), {
+  editMode: false
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | undefined): void;

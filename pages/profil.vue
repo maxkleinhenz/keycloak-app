@@ -4,7 +4,7 @@
     </AppPageTitle>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <AppInputField label="Benutzername" class="md:col-span-2">
-        <AppInlineEditableField label="Benutzername" :model-value="profile?.preferred_username" :edit-mode="false" />
+        <AppInlineEditableField label="Benutzername" :model-value="profile?.preferred_username" />
       </AppInputField>
 
       <AppInputField label="Vorname">
@@ -15,7 +15,7 @@
       </AppInputField>
 
       <AppInputField label="E-Mail-Adresse">
-        <AppInlineEditableField label="E-Mail-Adresse" :model-value="profile?.email" :edit-mode="false" />
+        <AppInlineEditableField label="E-Mail-Adresse" :model-value="profile?.email" />
       </AppInputField>
       <AppInputField label="E-Mail-Adresse bestätigt">
         <InputSwitch :model-value="profile?.email_verified" class="scale-90" disabled />

@@ -4,15 +4,23 @@
     </AppPageTitle>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <AppInputField label="Id" class="md:col-span-2">
-        <AppInlineEditableField label="Id" :model-value="group?.id" :edit-mode="false" />
+        <AppInlineEditableField label="Id" :model-value="group?.id" />
       </AppInputField>
 
       <AppInputField label="Name">
         <AppInlineEditableField label="Name" :model-value="group?.name" :edit-mode="editMode" />
       </AppInputField>
       <AppInputField label="Pfad">
-        <AppInlineEditableField label="Pfad" :model-value="group?.path" :edit-mode="editMode" />
+        <AppInlineEditableField label="Pfad" :model-value="group?.path" />
       </AppInputField>
+    </div>
+
+    <div>
+      <TabView>
+        <TabPanel header="Untergruppen">
+          <GroupList :groups="group?.subGroups" :navigable="true" />
+        </TabPanel>
+      </TabView>
     </div>
   </div>
 </template>
