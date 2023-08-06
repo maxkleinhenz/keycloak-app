@@ -33,54 +33,38 @@ export const useKeycloakApi = () => {
     return fetchKeycloak<User>(url);
   };
 
-  const fetchUserGroups = async (userId: string) =>
+  const fetchUserGroups = (userId: string) =>
     fetchKeycloak<Group[]>(
       `${config.public.KEYCLOAK_ADMIN_API}/users/${userId}/groups`
     );
 
-  const fetchGroups = async (groupId: string) =>
+  const fetchGroups = (groupId: string) =>
     fetchKeycloak<Group>(
       `${config.public.KEYCLOAK_ADMIN_API}/groups/${groupId}`
     );
 
-  const fetchGroupMembers = async (groupId: string) =>
+  const fetchGroupMembers = (groupId: string) =>
     fetchKeycloak<GroupMember[]>(
       `${config.public.KEYCLOAK_ADMIN_API}/groups/${groupId}/members`
     );
 
-  // const fetchUserGroups = (userId: string) =>
-  //   useAsyncData(`user:${userId}:groups`, () => {
-  //     const headers = getHeaders();
-  //     return $fetch<Group[]>(`/api/user/${userId}/groups`, {
-  //       headers,
-  //     });
-  //   });
+  const fetchUserCount = (search?: string | undefined) => {
+    const searchParam = search ? `?search=${search}` : '';
+    return fetchKeycloak<number>(
+      `${config.public.KEYCLOAK_ADMIN_API}/users/count${searchParam}`
+    );
+  };
 
-  // const canUserViewGroups = (user: UserInfo) =>
-  //   user.resource_access?.account?.roles?.includes('view-groups') ?? false;
-
-  // const getUserInfo = () => {
-  //   if (store.userInfo) return store.userInfo;
-
-  //   return useAsyncData('userInfo', async () => {
-  //     const data = await fetchUserInfo();
-  //     store.userInfo = data;
-  //     return data;
-  //   });
-  // };
-
-  // const getUserGroups = async () => {
-  //   const userId = store.userId;
-  //   if (!userId) {
-  //     console.error('no user id');
-  //     return;
-  //   }
-
-  //   return useAsyncData(`user:${userId}:groups`, async () => {
-  //     const data = await fetchUserGroups(userId);
-  //     return data;
-  //   });
-  // };
+  const fetchUsers = (
+    offset: number,
+    max: number,
+    search?: string | undefined
+  ) => {
+    const searchParam = search ? `&search=${search}` : '';
+    return fetchKeycloak<User[]>(
+      `${config.public.KEYCLOAK_ADMIN_API}/users/?first=${offset}&max=${max}${searchParam}`
+    );
+  };
 
   return {
     fetchUserInfo,
@@ -88,5 +72,7 @@ export const useKeycloakApi = () => {
     fetchUserGroups,
     fetchGroups,
     fetchGroupMembers,
+    fetchUserCount,
+    fetchUsers,
   };
 };
